@@ -4,7 +4,8 @@ import { User } from "../stack/main";
 import { UserMenu } from "./user-menu";
 import { useContext, useEffect, useState } from "react";
 import { NavigationItem, navigationStore } from "../context/navigation/navigation.provider";
-import { Navigate } from "../context/navigation/navigation.actions";
+import { Navigate, Redirect } from "../context/navigation/navigation.actions";
+import { useAuth } from "../hooks/auth/useAuth";
 
 function classNames(...classes: (string | boolean)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -36,6 +37,8 @@ export const NavBar = ({ user }: Props) => {
     };
     if(scrollTo) handleScroll(scrollTo);
   }, [scrollTo, dispatch]);
+
+  const {ready: authReady, authURL} = useAuth()
      
   return (
     <Disclosure as="nav" className="bg-gray-800 shadow sticky top-0 z-10">
@@ -114,6 +117,17 @@ export const NavBar = ({ user }: Props) => {
                 </button>
               </div>
               <div className="mt-3 space-y-1 px-2">
+              <DisclosureButton
+                    key='login'
+                    as="a"
+                    onClick={() => authReady ? (
+                      dispatch(Redirect(true)),
+                      window.location.href = authURL
+                    ) : ''}
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                  >
+                    {authReady ? 'Login' : 'Prepping' }
+                  </DisclosureButton>
                 {user.userNavigation.map((item) => (
                   <DisclosureButton
                     key={item.name}

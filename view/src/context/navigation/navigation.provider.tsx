@@ -12,13 +12,15 @@ export interface SimpleNavigationItem {
 
 type State = {
   navigation: NavigationItem[];
+  redirect: boolean
 }
 
 const initialState: State = {
   navigation: [
     { name: 'Home', id: 'home', current: true },
     { name: 'About', id: 'about', current: false },
-  ]
+  ],
+  redirect: false
 }
 
 type NavigationContext = {
@@ -35,11 +37,17 @@ const reducer: React.Reducer<State, Actions> = (
       const match = state.navigation.filter(n => n.id === action.payload)
       if(match.length < 1) return state
       return {
+        ...state,
         navigation: state.navigation.map(n => {
           n.current = false
           if(n.id === action.payload) n.current = true
           return n
         })
+      }
+    case ActionType.Redirect:
+      return {
+        ...state,
+        redirect: action.payload
       }
   }
 }
