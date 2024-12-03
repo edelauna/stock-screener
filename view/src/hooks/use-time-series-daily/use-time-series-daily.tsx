@@ -117,7 +117,7 @@ export const useTimeSeriesDaily = () => {
     //console.log(`currentDataRef.current:${currentDataRef.current} = ${activeSymbol["1. symbol"]}-${currentRef}`)
     if(!loading && fetchFromServer){
       setFetchFromServer(false)
-      if(currentFetchRef.current === fetchRef || currentTickerRef.current === ticker){
+      if(ticker && (currentFetchRef.current === fetchRef || currentTickerRef.current === ticker)){
         fetchData();
       }
     }
