@@ -25,16 +25,16 @@ export const useSymbolSearch = (input: string) => {
   const {db, active} = useDb()
   const currentInputRef = useRef('')
   const currentDataRef = useRef('')
-  
+
   useEffect(() =>{
-    if(state.currentDataRef === currentInputRef.current) 
+    if(state.currentDataRef === currentInputRef.current)
       setData(state.bestMatches)
     }, [state.bestMatches, state.currentDataRef])
 
   useEffect(() => {
     const getData = (db:IDBDatabase, key: string ) => {
       const objectStores = db.transaction([SYMBOL_SEARCH_STORE_NAME], 'readonly')
-    
+
       const dataStore = objectStores.objectStore(SYMBOL_SEARCH_STORE_NAME)
       const dataGetRequest = dataStore.get(key)
       dataGetRequest.onsuccess = (_) => {
@@ -56,22 +56,22 @@ export const useSymbolSearch = (input: string) => {
       }
     }
 
-    if(active) return 
+    if(active) return
     if(db && !loading && currentInputRef.current !== input) {
       setLoading(true)
       getData(db, input)
     }
   }, [db, loading, active, input, dispatch])
-  
+
 
   useEffect(() => {
       const fetchData = async () => {
           // Use the environment variable
           const url = `${process.env.REACT_APP_API_URL}stocks?fn=SYMBOL_SEARCH&keywords=${input}`
-          
+
           try {
               setLoading(true)
-              const response = await fetch(url);
+              const response = await fetch(url, {credentials: 'include', mode:'cors'});
               if (!response.ok) {
                   setError('Network response was not ok');
               }
@@ -89,7 +89,7 @@ export const useSymbolSearch = (input: string) => {
               setLoading(false);
           }
       };
-      if(!loading && fetchFromServer){ 
+      if(!loading && fetchFromServer){
         setFetchFromServer(false)
         if(currentDataRef.current === input){
           fetchData();

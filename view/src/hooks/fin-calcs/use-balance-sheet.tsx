@@ -50,7 +50,7 @@ interface BalannceSheetReportRaw {
 
 interface BalannceSheetReportData {
   symbol: string,
-  reports: BalannceSheetReport[] 
+  reports: BalannceSheetReport[]
 }
 
 interface BalannceSheetReportRawData {
@@ -103,7 +103,7 @@ export const useBalanaceSheet = (symbol: string): BalanceSheetState => {
       const url = `${process.env.REACT_APP_API_URL}stocks?fn=BALANCE_SHEET&symbol=${symbol}`
       try {
         setLoading(true)
-        const response = await fetch(url)
+        const response = await fetch(url , {credentials: 'include'})
         if(!response.ok){
           setError('Response was not ok.')
           return
@@ -140,14 +140,14 @@ export const useBalanaceSheet = (symbol: string): BalanceSheetState => {
   useEffect(() => {
     const getData = (db:IDBDatabase) => {
       const objectStores = db.transaction([BALANCE_SHEET_STORE_NAME], 'readonly')
-    
+
       const dataStore = objectStores.objectStore(BALANCE_SHEET_STORE_NAME)
       const dataGetRequest = dataStore.get(symbol)
-      
+
       objectStores.oncomplete = (_) => {
         if(dataGetRequest.result){
           setData(dataGetRequest.result)
-        } 
+        }
         setLoading(false)
       }
       objectStores.onerror = (ev) => {
