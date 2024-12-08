@@ -1,6 +1,6 @@
-import { RequestMuxProperties } from "../mux/request-mux"
-import { internalServerError } from "../utils/errors"
-import { buildURL, fetchWrapper } from "../utils/stocks"
+import { RequestMuxProperties } from "../../mux/request-mux"
+import { internalServerError } from "../../utils/errors"
+import { buildURL, fetchWrapper } from "../../utils/stocks"
 
 type MarketStatusProperties = {
   fn: string,
@@ -9,11 +9,11 @@ type MarketStatusProperties = {
 
 const METADATA_INFORMATION = "Global Market Open & Close Status"
 
-export const marketStatus = async ({fn, workerArgs}: MarketStatusProperties): Promise<Response> => {
-  const { env } = workerArgs
+export const marketStatus = async ({ fn, workerArgs }: MarketStatusProperties): Promise<Response> => {
+  const { env, ctx } = workerArgs
   const url = buildURL(env, `${fn}`)
-  try{
-    const responseToVerify = await fetchWrapper(url);
+  try {
+    const responseToVerify = await fetchWrapper(url, ctx);
     const response = responseToVerify.clone()
     let check = false
     let data = ""
@@ -24,13 +24,13 @@ export const marketStatus = async ({fn, workerArgs}: MarketStatusProperties): Pr
       check = data.includes(METADATA_INFORMATION)
       reader.cancel();
     }
-    
-    if(check){
-      return response  
+
+    if (check) {
+      return response
     } else {
-      return internalServerError("Unexpected data structure returned", {data})
+      return internalServerError("Unexpected data structure returned", { data })
     }
-  } catch(e){
+  } catch (e) {
     return internalServerError((e as Error).message)
   }
 }

@@ -13,19 +13,27 @@
 
 import { requestMux } from "./mux/request-mux";
 import { internalServerError } from "./utils/errors";
+import { reqAuthMiddleware } from "./utils/middleware";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		let response;
 		try {
-      response = requestMux({request, env, ctx})
-		} catch(e) {
-			const err = e as Error
-      response = internalServerError(err.message, err);
+			response = requestMux({ ...await reqAuthMiddleware({ request, env, ctx }) })
+		} catch (e) {
+			if (e instanceof Response) {
+				response = e
+			} else {
+				const err = e as Error
+				response = internalServerError(err.message, err);
+			}
 		} finally {
 			const initialResponse = await response
 			const newResponse = new Response(initialResponse?.body, initialResponse)
 			newResponse.headers.append("Access-Control-Allow-Origin", env.ALLOWED_ORIGIN)
+			newResponse.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+			newResponse.headers.append("Access-Control-Allow-Headers", "Content-Type, Authorization");
+			newResponse.headers.append('Access-Control-Allow-Credentials', 'true');
 			return newResponse
 		}
 

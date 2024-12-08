@@ -1,6 +1,6 @@
-import { RequestMuxProperties } from "../mux/request-mux";
-import { internalServerError } from "../utils/errors";
-import { buildURL, fetchWrapper } from "../utils/stocks";
+import { RequestMuxProperties } from "../../mux/request-mux";
+import { internalServerError } from "../../utils/errors";
+import { buildURL, fetchWrapper } from "../../utils/stocks";
 
 type BalanceSheetHandlerProperties = {
   fn: string;
@@ -10,11 +10,11 @@ type BalanceSheetHandlerProperties = {
 
 const KEY = '"symbol":'
 
-export const balanceSheetHandler = async ({fn, symbol, workerArgs}:BalanceSheetHandlerProperties): Promise<Response> => {
-  const {env} = workerArgs
+export const balanceSheetHandler = async ({ fn, symbol, workerArgs }: BalanceSheetHandlerProperties): Promise<Response> => {
+  const { env, ctx } = workerArgs
   const url = buildURL(env, `${fn}&symbol=${symbol}`);
-  try{
-    const responseToVerify = await fetchWrapper(url);
+  try {
+    const responseToVerify = await fetchWrapper(url, ctx);
     const response = responseToVerify.clone()
     let check = false
     let data = ""
@@ -25,13 +25,13 @@ export const balanceSheetHandler = async ({fn, symbol, workerArgs}:BalanceSheetH
       check = data.includes(KEY)
       reader.cancel();
     }
-    
-    if(check){
-      return response 
+
+    if (check) {
+      return response
     } else {
-      return internalServerError("Unexpected data structure returned", {data})
+      return internalServerError("Unexpected data structure returned", { data })
     }
-  } catch(e){
+  } catch (e) {
     return internalServerError((e as Error).message)
   }
 }
