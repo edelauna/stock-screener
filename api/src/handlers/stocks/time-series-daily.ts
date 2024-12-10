@@ -1,5 +1,7 @@
 import { RequestMuxProperties } from "../../mux/request-mux"
+import { planGuard } from "../../utils/billing"
 import { internalServerError } from "../../utils/errors"
+import { CustomExecutionContext } from "../../utils/middleware"
 import { buildURL, fetchWrapper } from "../../utils/stocks"
 
 type TimeSeriesDailyProperties = {
@@ -13,9 +15,10 @@ const METADATA_INFORMATION = "Daily Prices (open, high, low, close) and Volumes"
 
 const tracker: { [key: string]: Set<string> } = {}
 
-const softGuard = (request: Request, symbol: string) => {
-  // if authed and paid return false
-  const trackerKey = `${request.cf?.latitude}-${request.cf?.longitude}`
+const guard = (request: Request, symbol: string, env: Env, ctx: CustomExecutionContext) => {
+  const oid = ctx.user?.oid
+  if (oid && planGuard(env.BASE_PLAN, ctx)) return false
+  const trackerKey = `${oid}-${request.cf?.latitude}-${request.cf?.longitude}`
   if (trackerKey in tracker) { tracker[trackerKey].add(symbol) }
   else tracker[trackerKey] = new Set<string>().add(symbol)
 
@@ -25,7 +28,7 @@ const softGuard = (request: Request, symbol: string) => {
 
 export const timeSeriesDaily = async ({ fn, symbol, outputsize, workerArgs }: TimeSeriesDailyProperties): Promise<Response> => {
   const { env, request, ctx } = workerArgs
-  if (softGuard(request, symbol)) return new Response("Rate limited, login and upgrade account.", {
+  if (guard(request, symbol, env, ctx)) return new Response("Rate limited, login, or upgrade account.", {
     status: 429
   })
 

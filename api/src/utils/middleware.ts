@@ -1,6 +1,6 @@
 import { RequestMuxProperties } from "../mux/request-mux"
 import { Customer } from "./billing"
-import { verifyMessage } from "./cookies"
+import { CustomerCookie, verifyMessage } from "./cookies"
 import { Payload, verify } from "./jwt"
 import { refreshAccessToken } from "./tokens"
 
@@ -43,8 +43,12 @@ const validateCustomer = async (cookies: Cookies, env: Env, ctx: CustomExecution
   const partialJwt = cookies.customer
   if (!partialJwt) return
 
-  const { isValid, payload } = await verifyMessage<Customer>(partialJwt, env)
-  if (isValid) ctx.customer = payload
+  const { isValid, payload } = await verifyMessage<CustomerCookie>(partialJwt, env)
+  if (isValid) {
+    ctx.customer = payload.customer
+  } else {
+    ctx.customer = undefined
+  }
 }
 
 export const reqAuthMiddleware = async ({ request, env, ctx }: RequestMuxProperties) => {
@@ -56,7 +60,7 @@ export const reqAuthMiddleware = async ({ request, env, ctx }: RequestMuxPropert
   if (!valid) {
     ctx.logout = true
   } else {
-    validateCustomer(cookies, env, ctx)
+    await validateCustomer(cookies, env, ctx)
   }
 
   return { request, env, ctx }

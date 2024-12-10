@@ -13,5 +13,6 @@ interface Env {
 	PUBLIC_KEY_TENANT: string;
 	PUBLIC_KEY_POLICY_ID: string;
 	STRIPE_API_KEY: string;
-	HMAC_SIGNING_KEY: string;
+	RSA_PRIVATE_KEY: string;
+	BASE_PLAN: string;
 }

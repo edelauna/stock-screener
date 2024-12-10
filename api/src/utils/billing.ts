@@ -1,4 +1,4 @@
-import { signMessage } from "./cookies"
+import { CustomerCookie, signMessage } from "./cookies"
 import { internalServerError } from "./errors"
 import { verify } from "./jwt"
 import { CustomExecutionContext } from "./middleware"
@@ -11,7 +11,13 @@ export type Customer = {
   },
   subscriptions?: {
     data: {
-      id: string
+      items: {
+        data: {
+          plan: {
+            id: string
+          }
+        }[]
+      }
     }[]
   }
 }
@@ -23,8 +29,43 @@ type CustomerSearchResult = {
   data: Customer[]
 }
 
-export const generateCustomerCookie = async (access_token: string, env: Env, ctx: CustomExecutionContext) => {
-  const blankCookie = `customer=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict`
+export const planGuard = (planId: string, ctx: CustomExecutionContext) => {
+  const foundPlanId = ctx.customer?.subscriptions?.data.find(s => s.items.data.find(i => i.plan.id === planId))
+  return foundPlanId ? true : false
+}
+
+export const pluckCustomerFields = (customer: Customer) => ({
+  id: customer.id,
+  object: customer.object,
+  metadata: {
+    oid: customer.metadata.oid
+  },
+  subscriptions: {
+    data: customer.subscriptions?.data.map(d => ({
+      items: {
+        data: d.items.data.map(di => ({
+          plan: { id: di.plan.id },
+        })),
+      },
+    })) ?? [],
+  },
+})
+
+const blankCookie = `customer=; Path=/; Max-Age=0; SameSite=Strict`
+
+export const generateCustomerCookie = async (env: Env, ctx: CustomExecutionContext) => {
+  let oid = ctx.user?.oid
+
+  if (!oid) return blankCookie
+
+  const { customer } = ctx
+
+  if (!customer) return blankCookie
+
+  return `customer=${await signMessage<CustomerCookie>({ oid, customer }, env)}; Path=/; SameSite=Strict`
+}
+
+export const generateCustomerCookieSafely = async (access_token: string, env: Env, ctx: CustomExecutionContext) => {
   let oid = ctx.user?.oid
   if (!oid) {
     // verify access token incase just logged in
@@ -33,12 +74,10 @@ export const generateCustomerCookie = async (access_token: string, env: Env, ctx
     if (expired || !isVerified) return blankCookie
     oid = ctx.user?.oid
   }
-
-  if (!oid) return blankCookie
-
   const url = new URL('https://api.stripe.com/v1/customers/search');
 
   url.searchParams.append('query', `metadata['oid']:'${oid}'`);
+  url.searchParams.append('expand[]', 'data.subscriptions')
 
   const response = await stripeFetchWrapper(url.toString(), env)
   if (!response.ok) throw internalServerError(`generateCustomerCookie response was not ok`, { ...response })
@@ -49,11 +88,12 @@ export const generateCustomerCookie = async (access_token: string, env: Env, ctx
 
   if (!customer) return blankCookie
 
-  return `customer=${await signMessage({ oid, customer }, env)}; Path=/; HttpOnly; SameSite=Strict`
+  ctx.customer = pluckCustomerFields(customer)
 
+  return await generateCustomerCookie(env, ctx)
 }
 
-const stripeFetchWrapper = async (input: RequestInfo, env: Env, init?: RequestInit) => {
+export const stripeFetchWrapper = async (input: RequestInfo, env: Env, init?: RequestInit) => {
   try {
     return fetch(input, {
       ...init,

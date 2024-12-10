@@ -1,5 +1,7 @@
+import { keyHandler } from "../handlers/keys/keys-handler";
 import { CustomExecutionContext } from "../utils/middleware";
 import { authPathMux } from "./auth/auth-path-mux";
+import { billingMux } from "./billing/billing-path-mux";
 import { pathMux } from "./stocks/path-mux";
 
 export type RequestMuxProperties = {
@@ -15,6 +17,10 @@ export const requestMux = async ({ request, ...etc }: RequestMuxProperties): Pro
       return pathMux({ request, ...etc })
     case 'auth':
       return authPathMux({ request, ...etc })
+    case 'keys':
+      return keyHandler({ request, ...etc })
+    case 'billing':
+      return billingMux({ request, ...etc })
     default:
       return new Response("Not found", {
         status: 404

@@ -26,7 +26,7 @@ export const fetchWrapper = async (url: URL, ctx: CustomExecutionContext, cacheT
   if (response.status >= 200 && response.status < 300) {
     response = new Response(response.body, response)
     response.headers.set("Cache-Control", `max-age=${cacheTtl}`)
-    ctx.waitUntil(cache.put(cacheKey, response))
+    ctx.waitUntil(cache.put(cacheKey, response.clone()))
     return response
   } else {
     return internalServerError("Stock API returned non success status", { response, body: await response.text() })
