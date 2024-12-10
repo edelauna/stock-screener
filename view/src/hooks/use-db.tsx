@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useContext, useEffect, useState } from "react"
 import { INDEX_DB_NAME, INDEX_DB_VERSION, onUpgradeNeededCallBack } from "../context/db/db";
+import { errorStore } from "../context/errors/errors.provider";
+import { Add } from "../context/errors/errors.actions";
 
 export const useDb = () => {
-  const [error, setError] = useState("")
+  const {dispatch} = useContext(errorStore)
   const [active, setActive] = useState(true)
   const [db, setDb] = useState<IDBDatabase | null>(null)
 
-  const setErrorCb = useCallback((request: IDBOpenDBRequest) => setError(request.error?.message ?? 'Database error occured'), [])
+  const setErrorCb = useCallback((request: IDBOpenDBRequest) => dispatch(Add({
+    header:'Database error occured',
+    body: request.error?.message ?? ''
+  })), [dispatch])
 
   useEffect(() => {
       const request = indexedDB.open(INDEX_DB_NAME, INDEX_DB_VERSION)
@@ -25,13 +30,13 @@ export const useDb = () => {
         const {oldVersion} = event
         onUpgradeNeededCallBack(onUpgradeDb, {oldVersion});
         (onUpgradeDb.transaction as unknown as IDBTransaction).oncomplete = (ev: Event) => {
-          setDb(onUpgradeDb); 
+          setDb(onUpgradeDb);
           setActive(false)
         }
       }
   }, [setErrorCb])
 
   return {
-    db, active, error
+    db, active
   }
 }

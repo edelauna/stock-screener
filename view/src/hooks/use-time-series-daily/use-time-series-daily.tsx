@@ -3,6 +3,8 @@ import { TIME_SERIES_DAILY_METADATA_STORE_NAME, TIME_SERIES_DAILY_STORE_NAME, Ti
 import { store as symbolStore} from '../../context/symbol-search/symbol-search.provider';
 import { useDb } from "../use-db";
 import { formattedDateTime } from "../../utils/dateTime";
+import { errorStore } from "../../context/errors/errors.provider";
+import { Add, ErrorIds } from "../../context/errors/errors.actions";
 
 interface TimeSeriesDaily {
   [date: string]: TimeSeriesDayData
@@ -42,18 +44,18 @@ export const useTimeSeriesDaily = () => {
   const [data, setData] = useState<TimeSeriesDailyRow[]>([]);
   const [metadata, setMetadata] = useState<Data["Meta Data"]>(initialMetadata);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {dispatch} = useContext(errorStore)
   const [fetchFromServer, setFetchFromServer] = useState(false)
-  
+
   const {state: symbolState} = useContext(symbolStore)
   const {activeSymbol} = symbolState
   const ticker = activeSymbol["1. symbol"]
   const currentTickerRef = useRef('')
   const [fetchRef, setFetchRef] = useState(formattedDateTime(new Date(), 'UTC'))
   const currentFetchRef = useRef('')
-  
+
   const {db, active} = useDb()
-  
+
   useEffect(() => {
     const poll = () => setFetchRef(formattedDateTime(new Date(), 'UTC'))
     const intervalId = setInterval(poll, 15 * 60 * 1000); // 15 minutes
@@ -75,13 +77,26 @@ export const useTimeSeriesDaily = () => {
   useEffect(() => {
     const fetchData = async () => {
       const url = `${process.env.REACT_APP_API_URL}stocks?fn=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=full`
-      
+
       try {
           setLoading(true)
-          const response = await fetch(url);
+          const response = await fetch(url, {
+            credentials: 'include'
+          });
           if (!response.ok) {
-              setError('Network response was not ok');
-              return
+            if(response.status === 429) {
+              dispatch(Add({
+                header: "Reached the current limit for available tickers.",
+                body: "If you are not logged in, logging in will reset the counter, however for unlimited tickers, please upgrade.",
+                id: ErrorIds.CtaRequire
+              }))
+            } else {
+              dispatch(Add({
+                header: "useTimeSeriesDaily::fetchData: network resposne was not ok",
+                body: await response.text()
+              }))
+            }
+            return
           }
           const result: Data = await response.json();
 
@@ -90,7 +105,7 @@ export const useTimeSeriesDaily = () => {
             for(const date in result["Time Series (Daily)"]){
               rows.push({
                 id: `${result["Meta Data"]["2. Symbol"]}-${date}`,
-                date, 
+                date,
                 symbol: result["Meta Data"]["2. Symbol"],
                 ...result["Time Series (Daily)"][date]
               })
@@ -106,9 +121,11 @@ export const useTimeSeriesDaily = () => {
               "3. Last Refreshed": fetchRef
             })
           }
-          setError(null)
       } catch (err) {
-          setError((err as Error).message);
+        dispatch(Add({
+          header: "useTimeSeriesDaily::fetchData: had an error",
+          body: (err as Error).message
+        }))
       } finally {
           setLoading(false);
       }
@@ -121,17 +138,17 @@ export const useTimeSeriesDaily = () => {
         fetchData();
       }
     }
-  }, [fetchFromServer, ticker, fetchRef, loading]);
+  }, [fetchFromServer, ticker, fetchRef, loading, dispatch]);
 
   useEffect(() => {
     const getData = (db:IDBDatabase, symbol: string ) => {
-      
+
       const objectStores = db.transaction([TIME_SERIES_DAILY_STORE_NAME, TIME_SERIES_DAILY_METADATA_STORE_NAME], 'readonly')
-    
+
       const dataStore = objectStores.objectStore(TIME_SERIES_DAILY_STORE_NAME)
       const dataIndex = dataStore.index('symbol')
       const dataGetRequest = dataIndex.getAll(symbol)
-  
+
       const metadataStore = objectStores.objectStore(TIME_SERIES_DAILY_METADATA_STORE_NAME)
       const metadataGetRequest = metadataStore.get(symbol)
 
@@ -141,8 +158,10 @@ export const useTimeSeriesDaily = () => {
         setLoading(false)
       }
       objectStores.onerror = (ev) => {
-        console.error("There was an error loading data from indexDB, event:")
-        console.error(ev)
+        dispatch(Add({
+          header: "useBalanceSHeet::There was an error loading data from indexDB, event:",
+          body: JSON.stringify(ev)
+        }))
         setLoading(false)
       }
     }
@@ -150,7 +169,7 @@ export const useTimeSeriesDaily = () => {
       setLoading(true)
       getData(db, ticker)
     }
-  }, [active, db, ticker])
+  }, [active, db, ticker, dispatch])
 
   useEffect(() => {
     if (!active && db && data.length > 0) {
@@ -173,8 +192,7 @@ export const useTimeSeriesDaily = () => {
   return {
     data,
     metadata,
-    loading,
-    error
+    loading
   }
 
 }

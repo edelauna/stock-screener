@@ -21,7 +21,7 @@ const tenant = process.env.REACT_APP_AUTH_TENANT
 const policy = process.env.REACT_APP_AUTH_POLICY_ID
 
 
-export const useKeys = () => {
+export const usePublicKeys = () => {
   const [publicKeys, setPublicKeys] = useState<PublicKeyStruct>({})
   const fetched = useRef(false)
 
@@ -43,5 +43,26 @@ export const useKeys = () => {
 
   return {
     publicKeys
+  }
+}
+
+export const useLocalKey = () => {
+  const [localKey, setLocalKey] = useState<PartialRSAJWK>()
+  const localFetched = useRef(false)
+
+  useEffect(() => {
+    const fetchKey = async () => {
+      const url = `${process.env.REACT_APP_API_URL}keys`
+      const response = await fetch(url)
+      setLocalKey(await response.json())
+    }
+    if(!localFetched.current) {
+      localFetched.current = true
+      fetchKey()
+    }
+  },[])
+
+  return {
+    localKey
   }
 }

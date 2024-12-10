@@ -3,6 +3,8 @@ import { store } from "../context/symbol-search/symbol-search.provider";
 import { Refresh, UpdateCurrentDataRef } from "../context/symbol-search/symbol-search.actions";
 import { useDb } from "./use-db";
 import { SYMBOL_SEARCH_STORE_NAME } from "../context/db/db";
+import { errorStore } from "../context/errors/errors.provider";
+import { Add } from "../context/errors/errors.actions";
 
 export interface SymbolSearchResult {
   "1. symbol": string,
@@ -18,9 +20,9 @@ export interface SymbolSearchResult {
 
 export const useSymbolSearch = (input: string) => {
   const {state, dispatch} = useContext(store)
+  const {dispatch: errorDispatch} = useContext(errorStore)
   const [data, setData] = useState<SymbolSearchResult[]>(state.bestMatches);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [fetchFromServer, setFetchFromServer] = useState(false)
   const {db, active} = useDb()
   const currentInputRef = useRef('')
@@ -49,9 +51,10 @@ export const useSymbolSearch = (input: string) => {
       }
       objectStores.oncomplete = (_) => setLoading(false)
       objectStores.onerror = (ev) => {
-        setError("There was an error loading data from indexDB")
-        console.error("There was an error loading data from indexDB, event:")
-        console.error(ev)
+        errorDispatch(Add({
+          header: "useSymbolSearch: There was an error loading data from indexDB",
+          body: JSON.stringify(ev)
+        }))
         setLoading(false)
       }
     }
@@ -61,7 +64,7 @@ export const useSymbolSearch = (input: string) => {
       setLoading(true)
       getData(db, input)
     }
-  }, [db, loading, active, input, dispatch])
+  }, [db, loading, active, input, dispatch, errorDispatch])
 
 
   useEffect(() => {
@@ -72,19 +75,22 @@ export const useSymbolSearch = (input: string) => {
           try {
               setLoading(true)
               const response = await fetch(url, {credentials: 'include', mode:'cors'});
-              if (!response.ok) {
-                  setError('Network response was not ok');
-              }
+              if (!response.ok) return errorDispatch(Add({
+                  header: 'useSymbolSearch::Network response was not ok.',
+                  body: await response.text()
+                }))
               const result = await response.json();
               if ('bestMatches' in result) {
                 dispatch(Refresh(result.bestMatches))
               } else {
                 dispatch(Refresh([]))
               }
-              setError(null)
               dispatch(UpdateCurrentDataRef(input))
           } catch (err) {
-              setError((err as Error).message);
+            errorDispatch(Add({
+              header: 'useSymbolSearch::fetchData error.',
+              body: (err as Error).message
+            }))
           } finally {
               setLoading(false);
           }
@@ -95,12 +101,11 @@ export const useSymbolSearch = (input: string) => {
           fetchData();
         }
       }
-  }, [input, dispatch, fetchFromServer, loading]);
+  }, [input, dispatch, fetchFromServer, loading, errorDispatch]);
 
   return {
     data,
-    loading,
-    error
+    loading
   }
 
 }

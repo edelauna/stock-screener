@@ -6,6 +6,7 @@ import { Header } from '../components/header';
 import { NavBar } from '../components/nav-bar';
 import { navigationStore, SimpleNavigationItem } from '../context/navigation/navigation.provider';
 import { useObserver } from '../hooks/navigation/use-observer';
+import ErrorBanner from '../components/errors/error-banner';
 
 export interface User {
   name: string;
@@ -30,10 +31,11 @@ const Main = () => {
   }
 
   return (
-    <div ref={homeRef} className="min-h-full relative" id='home'>
+    <div ref={homeRef} className="min-h-full relative bg-white dark:bg-gray-800" id='home'>
       {isLoading()}
     <div className={navigationState.redirect ? 'opacity-20' : ''}>
       <NavBar />
+        <ErrorBanner />
         <Header />
         <main>
           <div className={`mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${state.activeSymbol['1. symbol'] !== '' ? '' : 'hidden'}`}>

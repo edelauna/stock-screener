@@ -2,6 +2,8 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
 import { navigationStore } from "../../context/navigation/navigation.provider"
 import { Identity, RawIdentity, Redirect } from "../../context/navigation/navigation.actions"
+import { errorStore } from "../../context/errors/errors.provider"
+import { Add } from "../../context/errors/errors.actions"
 
 const PKCE_KEY = 'pkce_verifier'
 
@@ -58,6 +60,7 @@ const responseMode = 'fragment'
 
 export const useAuth = () => {
   const {state, dispatch} = useContext(navigationStore)
+  const {dispatch: errorDispatch} = useContext(errorStore)
   const [verifier, setVerifier] = useState(initializeVerifier())
   const [codeChallenge, setCodeChallenge] = useState<string|null>(null)
   const [ready, setReady] = useState(false)
@@ -108,12 +111,18 @@ export const useAuth = () => {
           method: 'POST',
           body: JSON.stringify({ code, verifier}),
         })
-        if(!response.ok) console.error(`Fetch token response not ok:${await response.text()}`)
+        if(!response.ok) return errorDispatch(Add({
+          header: 'useAuth::Fetch token response not ok',
+          body: await response.text()
+        }))
 
         const {id_token} = await response.json()
         dispatch(RawIdentity(id_token))
       } catch (e){
-        console.error(`There was an error fetching token:${(e as Error).message}`)
+        errorDispatch(Add({
+          header: 'useAuth::There was an error fetching token',
+          body: (e as Error).message
+        }))
       } finally {
         setCodeChallenge(null)
         navigate('/')
@@ -136,7 +145,10 @@ export const useAuth = () => {
         const {redirect_uri} = await response.json()
         window.location = redirect_uri
       } catch (e){
-        console.error(`There was an error fetching token:${(e as Error).message}`)
+        errorDispatch(Add({
+          header: 'useAuth::There was an error fetching token',
+          body: (e as Error).message
+        }))
       } finally {
         setCodeChallenge(null)
         navigate('/')
@@ -162,7 +174,7 @@ export const useAuth = () => {
         dispatch(Identity(null))
       }
     }
-  }, [location, verifier, dispatch, navigate, state.rawIdentityToken])
+  }, [location, verifier, dispatch, navigate, state.rawIdentityToken, errorDispatch])
 
 
   return {

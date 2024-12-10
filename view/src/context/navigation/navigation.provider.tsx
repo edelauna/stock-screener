@@ -1,6 +1,9 @@
-import React, { createContext, useEffect, useReducer } from "react";
-import { Actions, ActionType, Identity, IdentityToken, RawIdentity } from "./navigation.actions";
-import { PartialRSAJWK, useKeys } from "../../hooks/auth/use-keys";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
+import { Actions, ActionType, Identity, IdentityToken } from "./navigation.actions";
+import { PartialRSAJWK, usePublicKeys } from "../../hooks/auth/use-keys";
+import { errorStore } from "../errors/errors.provider";
+import { Add } from "../errors/errors.actions";
+import { useNavigate } from "react-router";
 
 export interface NavigationItem extends SimpleNavigationItem {
   current: boolean;
@@ -76,7 +79,7 @@ export const navigationStore = createContext<NavigationContext>({
   dispatch: () => null
 })
 
-const base64UrlDecoder = (msg: string) => atob(msg.replace(/-/g,'+').replace(/_/g,'/'))
+export const base64UrlDecoder = (msg: string) => atob(msg.replace(/-/g,'+').replace(/_/g,'/'))
 
 const verify = async (parts: string[], keyData: PartialRSAJWK) => {
   const signedInput = parts.slice(0,2).join('.')
@@ -104,6 +107,7 @@ const verify = async (parts: string[], keyData: PartialRSAJWK) => {
 const { Provider } = navigationStore
 
 export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
+  const {dispatch: errorDispatch} = useContext(errorStore)
   const [state, dispatch] = useReducer(reducer, initialState, (state) => {
     try {
       return {
@@ -111,11 +115,15 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
         rawIdentityToken: sessionStorage.getItem(SESSION_STORAGE_KEY) ?? ''
       }
     } catch(e){
-      console.error('NavigationProvider:initialState:error',e)
+      errorDispatch(Add({
+        header: 'NavigationProvider:initialState:error',
+        body: (e as Error).message
+      }))
       return state
     }
   })
-  const { publicKeys } = useKeys()
+  const { publicKeys } = usePublicKeys()
+  const navigate = useNavigate()
 
   // verify token updated to state
   useEffect(() => {
@@ -134,13 +142,14 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
         if(validSignature && payload.aud === process.env.REACT_APP_AUTH_CLIENT_ID && (payload.exp * 1000 > new Date().getTime())){
           dispatch(Identity({header, payload, signature: parts[2]}))
         } else {
-          dispatch(RawIdentity(''))
-          dispatch(Identity(null))
+          navigate('/auth/logout')
         }
       } catch (e) {
-        console.error('NavigationProvider:validate:error:', e)
-        dispatch(RawIdentity(''))
-        dispatch(Identity(null))
+        errorDispatch(Add({
+          header: 'NavigationProvider:validate:error:',
+          body: (e as Error).message
+        }))
+        navigate('/auth/logout')
       }
     }
 
@@ -154,7 +163,7 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
 
     if(parts.length === 3) validate(parts)
 
-  }, [state.rawIdentityToken, publicKeys])
+  }, [state.rawIdentityToken, publicKeys, errorDispatch, navigate])
 
   // save identity token to session storage
   useEffect(() => sessionStorage.setItem(SESSION_STORAGE_KEY, state.rawIdentityToken), [state.rawIdentityToken])

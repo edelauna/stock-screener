@@ -8,15 +8,13 @@ export const useObserver = (ref: React.MutableRefObject<any>) => {
 
   useEffect(() => setRef(r => {
     if(!r.includes(ref)) r.push(ref)
-      console.log(`useObserver:refs.length:${r.length}`)
+
     return r
   }), [ref])
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        // set the active nav link
-        console.log(`${entry.target.id}intersectionRatio:${entry.intersectionRatio}:isIntersecting:${entry.isIntersecting}`)
         if(entry.isIntersecting) dispatch(Navigate(entry.target.id))
       })
     }, {threshold: 0.5})

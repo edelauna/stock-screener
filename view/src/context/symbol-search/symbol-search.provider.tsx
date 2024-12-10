@@ -1,8 +1,10 @@
-import React, { createContext, useEffect, useReducer, useRef } from "react";
+import React, { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import { Actions, ActionType} from "./symbol-search.actions";
 import { SymbolSearchResult } from "../../hooks/use-symbol-search";
 import { useDb } from "../../hooks/use-db";
 import { SYMBOL_SEARCH_STORE_NAME } from "../db/db";
+import { errorStore } from "../errors/errors.provider";
+import { Add } from "../errors/errors.actions";
 
 export interface State {
   bestMatches: SymbolSearchResult[];
@@ -79,13 +81,13 @@ const { Provider } = store;
 
 export const SymbolSearchProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const {dispatch: errorDispatch} = useContext(errorStore)
   /**
    * side effect - load from indexDB
    */
   const {db, active: dbActive} = useDb()
   const currentDataRef = useRef<string | null>(null)
-  
+
   useEffect(() => {
     const setState = (db:IDBDatabase, state: State) => {
       const objectStores = db.transaction([SYMBOL_SEARCH_STORE_NAME], 'readwrite')
@@ -94,8 +96,10 @@ export const SymbolSearchProvider = ({ children }: { children: React.ReactNode }
       dataStore.put({bestMatches: state.bestMatches, input: state.currentDataRef})
 
       objectStores.onerror = (ev) => {
-        console.error("There was an error saving data into indexDB, event:")
-        console.error(ev)
+        errorDispatch(Add({
+          header: "SymbolSearchProvider::There was an error saving data into indexDB",
+          body: JSON.stringify(ev)
+        }))
       }
     }
     if (!dbActive && db) {
@@ -105,7 +109,7 @@ export const SymbolSearchProvider = ({ children }: { children: React.ReactNode }
         currentDataRef.current = state.currentDataRef
       }
     }
-  }, [db, dbActive, state]) // add symbol dependancy
+  }, [db, dbActive, state, errorDispatch]) // add symbol dependancy
 
   return <Provider value={{ state, dispatch }} children={children} />;
 };
