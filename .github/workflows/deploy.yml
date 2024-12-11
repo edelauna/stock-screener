@@ -32,6 +32,7 @@ jobs:
         run: cd ${{ matrix.dst }} && npm install
 
       - name: Build
+        if: ${{matrix.dst == 'view' }}
         run: cd ${{ matrix.dst }} && npm run build
 
       - env:
