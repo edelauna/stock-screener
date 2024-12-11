@@ -1,0 +1,35 @@
+name: Build & Test
+on:
+  push:
+    branches:
+      - prod
+  pull_request:
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest # Use the latest version of Ubuntu
+    strategy:
+      matrix:
+        dst: ["view", "api"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ matrix.dst }}/.node-version
+          cache-dependency-path: ${{ matrix.dst }}/package-lock.json
+          cache: "npm"
+
+      - name: Install dependencies
+        run: cd ${{ matrix.dst }} && npm install
+
+      - name: Run tests
+        run: cd ${{ matrix.dst }} && npm test
+
+  deploy:
+    needs: build
+    name: Deploy
+    if: github.ref == 'refs/heads/prod'
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

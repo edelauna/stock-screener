@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        description: Cloudflare Api Token
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dst: ["view", "api"]
+        include:
+          - dst: "view"
+            deploy_cmd: "npx wrangler pages deploy --project-name lokeel-stock-screener --branch prod build"
+          - dst: "api"
+            deploy_cmd: "npx wrangler deploy"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ matrix.dst }}/.node-version
+          cache-dependency-path: ${{ matrix.dst }}/package-lock.json
+          cache: "npm"
+
+      - name: Install dependencies
+        run: cd ${{ matrix.dst }} && npm install
+
+      - name: Build
+        run: cd ${{ matrix.dst }} && npm run build
+
+      - env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: cd ${{ matrix.dst }} && ${{ matrix.deploy_cmd }}
