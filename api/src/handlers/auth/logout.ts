@@ -10,7 +10,7 @@ export const logoutHandler = async ({ request, env, ctx }: RequestMuxProperties)
   const cookies = [
     `access_token=; Path=/; Max-Age=0; HttpOnly; Samesite=Strict`,
     `refresh_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict`,
-    `customer=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict`
+    `customer=; Path=/; Max-Age=0; SameSite=Strict`
   ];
   const response = new Response(JSON.stringify({ redirect_uri: url }), {
     status: 200,

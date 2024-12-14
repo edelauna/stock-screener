@@ -30,9 +30,14 @@ export const refreshAccessToken = async (refresToken: string, env: Env, ctx: Cus
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body
   })
-  if (!result.ok) throw internalServerError(await result.text(), { status: result.status, statusTest: result.statusText })
-  // todo should recursively verify this signature
-  const { access_token, refresh_token } = await result.json<ResponseBody>()
-  ctx.newAccessToken = access_token
-  ctx.newRefreshToken = refresh_token
+  if (result.ok) {
+    // should maybe verify this response...
+    const { access_token, refresh_token } = await result.json<ResponseBody>()
+    ctx.newAccessToken = access_token
+    ctx.newRefreshToken = refresh_token
+    return true
+  } else {
+    return false
+  }
+
 }
