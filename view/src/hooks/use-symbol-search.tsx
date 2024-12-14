@@ -97,7 +97,7 @@ export const useSymbolSearch = (input: string) => {
       };
       if(!loading && fetchFromServer){
         setFetchFromServer(false)
-        if(currentDataRef.current === input){
+        if(currentDataRef.current === input && input !== ''){
           fetchData();
         }
       }
