@@ -6,11 +6,12 @@ import { useLoginCb } from "../hooks/auth/use-login-cb"
 export const LoginButton = () => {
   const {state} = useContext(navigationStore)
   const {identityToken} = state
+  const cb = useLoginCb()
 
   return <MenuButton
   key='login'
   as="a"
-  onClick={useLoginCb}
+  onClick={cb}
   className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
 >
   {identityToken ? `Hi ${identityToken.payload.name}` : 'Login' }

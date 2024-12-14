@@ -13,7 +13,26 @@
 
 import { requestMux } from "./mux/request-mux";
 import { internalServerError } from "./utils/errors";
-import { reqAuthMiddleware } from "./utils/middleware";
+import { CustomExecutionContext, reqAuthMiddleware } from "./utils/middleware";
+
+const postware = ({ response, ctx }: { response: Response, ctx: CustomExecutionContext }) => {
+	if (ctx.logout) {
+		const cookies = [
+			`access_token=; Path=/; Max-Age=0; HttpOnly; Samesite=Strict`,
+			`refresh_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict`,
+			`customer=; Path=/; Max-Age=0; SameSite=Strict`
+		];
+		cookies.forEach(c => response.headers.append('Set-Cookie', c))
+	}
+	if (ctx.newAccessToken && ctx.newRefreshToken) {
+		const cookies = [
+			`access_token=${ctx.newAccessToken}; Path=/; HttpOnly; Samesite=Strict`,
+			`refresh_token=${ctx.newRefreshToken}; Path=/; HttpOnly; SameSite=Strict`,
+		];
+		cookies.forEach(c => response.headers.append('Set-Cookie', c))
+	}
+	return response
+}
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
@@ -34,7 +53,8 @@ export default {
 			newResponse.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 			newResponse.headers.append("Access-Control-Allow-Headers", "Content-Type, Authorization");
 			newResponse.headers.append('Access-Control-Allow-Credentials', 'true');
-			return newResponse
+
+			return postware({ response: newResponse, ctx })
 		}
 
 	},

@@ -1,5 +1,5 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { generateRSIannotations, generateTimeDailySeries, limitXAxis } from '../utils/chart';
 import { format, addMinutes } from 'date-fns';
@@ -25,7 +25,10 @@ export const Chart: React.FC = () => {
   const {state: symbolState} = useContext(symbolStore)
 
   const input = symbolState.activeSymbol['2. name']
-  const {data, loading} = useTimeSeriesDaily()
+  const inputSymbol = symbolState.activeSymbol['1. symbol']
+  const {data, metadata, loading} = useTimeSeriesDaily()
+  const ticker = metadata['2. Symbol']
+  const currentTickerRef = useRef("")
   const [series, setSeriees] = useState<ApexAxisChartSeries>([{name: input, data:[[]]}])
   const [yAxisRange, setYAxisRange] = useState<AxisRange>({
     min: 200,
@@ -42,6 +45,7 @@ export const Chart: React.FC = () => {
   const [rsiPeriod] = useState(7) // maybe make this interactive in future
   const [xAnnotation, setXAnnotations] = useState<ApexAnnotations | null>(null)
   const [indicator, setIndicator] = useState({price: 0.00, rsi: 50, date: today})
+  const [indicatorLoading, setIndicatorLoading] = useState(true)
 
   const updateYAxisRange = useCallback((ctx: ApexContextPartial, {xaxis}: ApexOptions, setter: (value: React.SetStateAction<AxisRange>) => void) => {
     const [minDate, maxDate] = limitXAxis(xaxis?.min!!, xaxis?.max!!)
@@ -63,14 +67,17 @@ export const Chart: React.FC = () => {
         filteredData.push(twoDArray[i])
     });
     // add additional records for rsi calculations
-    for(let i = 0 ; i < rsiPeriod; i++){
+    for(let i = 0 ; i < Math.min(rsiPeriod, indicesForRSIRetrieval.length); i++){
       const indexToRetrieve = indicesForRSIRetrieval[i]
       filteredData.push(twoDArray[indexToRetrieve])
     }
 
     const [annotations, lastRSI] = generateRSIannotations(filteredData, rsiPeriod)
     if(annotations) setXAnnotations(annotations)
-    if(lastRSI) setIndicator(i => ({price: filteredData[0][1], rsi: lastRSI, date: new Date(filteredData[0][0])}))
+    if(lastRSI) {
+      setIndicator({price: filteredData[0][1], rsi: lastRSI, date: new Date(filteredData[0][0])})
+      setIndicatorLoading(false)
+    }
 
     // Calculate the new min and max for the Y-axis - ignoring the additional records
     const yValues = filteredData.slice(0, -rsiPeriod).map(item => item[1]);
@@ -80,14 +87,22 @@ export const Chart: React.FC = () => {
   }, [rsiPeriod]);
 
   useEffect(() => {
-    if(!loading && data.length > 0){
+    if(ticker !== inputSymbol){
+      setSeriees([{name: input, data:[[]]}])
+      setIndicatorLoading(true)
+    }
+  }, [ticker, inputSymbol, input])
+
+  useEffect(() => {
+    if(!loading && data.length > 0 && ticker === inputSymbol && ticker !== currentTickerRef.current){
+      currentTickerRef.current = ticker
       const generatedData = generateTimeDailySeries(data).reverse()
       setSeriees([{
         name: input,
         data: generatedData
       }])
     }
-  }, [loading, data, input])
+  }, [loading, data, input, ticker, inputSymbol])
 
 
   const [options, setOptions] = useState<ApexOptions>({
@@ -295,15 +310,17 @@ export const Chart: React.FC = () => {
 
   return (
     <div className="w-full h-100">
-      <div className="flex items-baseline">
-        <Indicator />
-        <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Price: {indicator.price} {symbolState.activeSymbol['8. currency']}
-        </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-          as of: {formattedDate(indicator.date ,'UTC')}
-        </span>
+      {indicatorLoading ? <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>:
+        <div className="flex items-baseline">
+          <Indicator />
+          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Price: {indicator.price} {symbolState.activeSymbol['8. currency']}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+            as of: {formattedDate(indicator.date ,'UTC')}
+          </span>
       </div>
+      }
       <div id="wrapper">
         <div id="chart2">
           <ReactApexChart options={options} series={series} type="line" height={230} />

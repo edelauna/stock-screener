@@ -1,13 +1,13 @@
 import { TimeSeriesDailyRow } from "../context/db/db"
 
-export type Series = number [][]
+export type Series = number[][]
 
 export const generateTimeDailySeries = (input: TimeSeriesDailyRow[]): Series => {
-  return input.map((row, i) =>[
+  return input.map((row, i) => [
     new Date(row.date).getTime(),
-    i === (input.length - 1) ? 
+    i === (input.length - 1) ?
       // for the last entry will use the close since this will be displayed - will need to update it for real time quote
-      parseFloat(row["4. close"]) : 
+      parseFloat(row["4. close"]) :
       // conver to cents and round to nearest cent before converting back to dollars to calculate mid
       Math.round((parseFloat(row["2. high"]) + parseFloat(row["3. low"])) * 100 / 2) / 100
   ])
@@ -20,9 +20,9 @@ type Slider = {
 type AnnotationType = 'buy' | 'sell'
 
 const generateAnnotation = (slider: Slider, data: number[][], annotationType: AnnotationType): XAxisAnnotations => {
-  const text = annotationType === 'sell' ? 'Sell': 'Buy'
-  const borderColor = annotationType ==='sell' ? '#FF3D3D': '#B3F7CA'
-  const backgroundColor = annotationType ==='sell' ? '#D50000' : '#00E396'
+  const text = annotationType === 'sell' ? 'Sell' : 'Buy'
+  const borderColor = annotationType === 'sell' ? '#FF3D3D' : '#B3F7CA'
+  const backgroundColor = annotationType === 'sell' ? '#D50000' : '#00E396'
   let annotation: XAxisAnnotations = {
     x: data[slider.initial!!][0],
     fillColor: borderColor,
@@ -38,14 +38,14 @@ const generateAnnotation = (slider: Slider, data: number[][], annotationType: An
       text: text,
     }
   }
-  if(slider.prev !== slider.initial){
+  if (slider.prev !== slider.initial) {
     annotation = {
       ...annotation,
       x2: data[slider.prev!!][0],
     }
   }
   slider.initial = null
-  slider.prev = null  
+  slider.prev = null
   return annotation
 }
 
@@ -59,9 +59,9 @@ export const generateRSIannotations = (data: number[][], period: number): [ApexA
   let gains: number[] = []
   let losses: number[] = []
 
-  for(let i = 1; i < data.length; i++){
+  for (let i = 1; i < data.length; i++) {
     const change = data[i - 1][1] - data[i][1]
-    if(change > 0) {
+    if (change > 0) {
       gains = [...gains, change]
       losses = [...losses, Number.EPSILON]
     } else {
@@ -69,7 +69,7 @@ export const generateRSIannotations = (data: number[][], period: number): [ApexA
       // invert loss since it'll be used as a denominator
       losses = [...losses, change]
     }
-    if(i >= period){
+    if (i >= period) {
       const rsiIdx = i - period
       const avgGain = gains.slice(rsiIdx, i).reduce((sum, gain) => sum + gain, 0) / period
       const avgLoss = losses.slice(rsiIdx, i).reduce((sum, loss) => sum - loss, 0) / period
@@ -80,40 +80,40 @@ export const generateRSIannotations = (data: number[][], period: number): [ApexA
   }
 
   const annotations: XAxisAnnotations[] = []
-  const buySlider : Slider = {initial: null, prev: null}
-  const sellSlider : Slider = {initial: null, prev: null}
+  const buySlider: Slider = { initial: null, prev: null }
+  const sellSlider: Slider = { initial: null, prev: null }
 
-  for(let i = 0; i <= data.length - period; i++) {
+  for (let i = 0; i <= data.length - period; i++) {
     const value = rsiValues[i]
-    if(value < 30){
-      if(sellSlider.initial !== null){
+    if (value < 30) {
+      if (sellSlider.initial !== null) {
         // record annotation
         annotations.push(generateAnnotation(sellSlider, data, 'sell'))
       }
-      if(buySlider.prev === (i - 1)) buySlider.prev = i // slide
-      if(buySlider.initial === null) {
+      if (buySlider.prev === (i - 1)) buySlider.prev = i // slide
+      if (buySlider.initial === null) {
         buySlider.initial = i
         buySlider.prev = i
       }
-    } else if(value> 70) {
-      if(buySlider.initial !== null){
+    } else if (value > 70) {
+      if (buySlider.initial !== null) {
         // record annotation
         annotations.push(generateAnnotation(buySlider, data, 'buy'))
       }
-      if(sellSlider.prev === (i - 1)) sellSlider.prev = i // slide
-      if(sellSlider.initial === null) {
+      if (sellSlider.prev === (i - 1)) sellSlider.prev = i // slide
+      if (sellSlider.initial === null) {
         sellSlider.initial = i
         sellSlider.prev = i
       }
     } else {
-      if(buySlider.initial !== null) annotations.push(generateAnnotation(buySlider, data, 'buy'))
-      if(sellSlider.initial !== null) annotations.push(generateAnnotation(sellSlider, data, 'sell'))
+      if (buySlider.initial !== null) annotations.push(generateAnnotation(buySlider, data, 'buy'))
+      if (sellSlider.initial !== null) annotations.push(generateAnnotation(sellSlider, data, 'sell'))
     }
   }
-  
-  if(buySlider.initial !== null) annotations.push(generateAnnotation(buySlider, data, 'buy'))
-  if(sellSlider.initial !== null) annotations.push(generateAnnotation(sellSlider, data, 'sell'))
-  if(annotations.length > 0){
+
+  if (buySlider.initial !== null) annotations.push(generateAnnotation(buySlider, data, 'buy'))
+  if (sellSlider.initial !== null) annotations.push(generateAnnotation(sellSlider, data, 'sell'))
+  if (annotations.length > 0) {
     return [{
       xaxis: annotations
     }, rsiValues[0]]

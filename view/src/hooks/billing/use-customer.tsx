@@ -8,6 +8,14 @@ import { Add } from "../../context/errors/errors.actions"
 
 const scanForCustomerCookie = () => document.cookie.split(';').find(c => c.split('=')[0] === 'customer')?.split('=')[1]
 
+const deleteCustomerCookie = () => {
+  const nonCustomerCookies = document.cookie.split(';').filter(c => c.split('=')[0] !== 'customer')
+  document.cookie = [
+    ...nonCustomerCookies,
+    "customer=; Path=/; Max-Age=0; SameSite=Strict"
+  ].join(';')
+}
+
 export const useCustomer = () => {
   const [rawCustomer, setRawCustomer] = useState(() => scanForCustomerCookie())
   const [customer, setCustomer] = useState()
@@ -15,7 +23,7 @@ export const useCustomer = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const checkoutIdRef = useRef('')
-  const {dispatch} = useContext(navigationStore)
+  const {state, dispatch} = useContext(navigationStore)
   const {dispatch: errorDispatch} = useContext(errorStore)
 
   useEffect(() => {
@@ -93,6 +101,14 @@ export const useCustomer = () => {
       }
     }
   }, [location, dispatch, errorDispatch, navigate])
+
+  useEffect(() => {
+    if(rawCustomer && state.rawIdentityToken === ''){
+      deleteCustomerCookie()
+      setCustomer(undefined)
+      setRawCustomer(undefined)
+    }
+  }, [rawCustomer, state.rawIdentityToken, navigate])
 
   return { customer }
 }

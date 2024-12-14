@@ -15,6 +15,9 @@ export default function ErrorDisplay() {
   const {customer} = useCustomer()
   const {state: navState} = useContext(navigationStore)
   const {identityToken} = navState
+  const loginCB = useLoginCb()
+  const manageCB = useManageCb()
+  const updradeCB = useUpgradeCb()
 
   const generateIssueCb = useCallback(() => {
     if(!mainError) return
@@ -81,8 +84,8 @@ export default function ErrorDisplay() {
                 className="inline-flex items-center gap-2 rounded-md bg-gray-700 py-1.5 px-3 text-sm font-semibold text-white shadow-inner shadow-white/10 focus:outline-none data-[hover]:bg-gray-600"
                 onClick={mainError.id !== ErrorIds.CtaRequire ?
                   generateIssueCb : !identityToken ?
-                    useLoginCb : customer ?
-                      useManageCb : useUpgradeCb
+                    loginCB : customer ?
+                      manageCB : updradeCB
                 }
               >
                 {mainError.id !== ErrorIds.CtaRequire ?

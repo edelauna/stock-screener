@@ -33,7 +33,7 @@ const validateRefreshAccessToken = async (cookies: Cookies, env: Env, ctx: Custo
 
   if (!isVerified) return false
 
-  if (expired && cookies.refresh_token) refreshAccessToken(cookies.refresh_token, env, ctx)
+  if (expired && cookies.refresh_token) return await refreshAccessToken(cookies.refresh_token, env, ctx)
 
   return true
 
@@ -59,6 +59,8 @@ export const reqAuthMiddleware = async ({ request, env, ctx }: RequestMuxPropert
   const valid = await validateRefreshAccessToken(cookies, env, ctx)
   if (!valid) {
     ctx.logout = true
+    ctx.customer = undefined
+    ctx.user = undefined
   } else {
     await validateCustomer(cookies, env, ctx)
   }
