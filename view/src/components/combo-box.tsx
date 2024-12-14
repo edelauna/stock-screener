@@ -22,7 +22,7 @@ export default function Example() {
         <div className="relative">
           <ComboboxInput
             className={clsx(
-              'w-full rounded-lg border border-gray-300 bg-white py-1.5 pr-8 pl-3 text-sm text-gray-800',
+              'w-full rounded-lg border border-gray-300 bg-white py-1.5 pr-8 pl-3 text-base text-gray-800',
               'focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
             )}
             displayValue={(ticker: SymbolSearchResult) => ticker?.['1. symbol']}
@@ -30,8 +30,8 @@ export default function Example() {
           />
           <ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
             {
-              data.length > 0 ? 
-                <ChevronDownIcon className="h-4 w-4 text-gray-600 group-hover:text-blue-500" /> : 
+              data.length > 0 ?
+                <ChevronDownIcon className="h-4 w-4 text-gray-600 group-hover:text-blue-500" /> :
                 <MagnifyingGlassIcon className="h-4 w-4 text-gray-600 group-hover:text-blue-500" />}
           </ComboboxButton>
         </div>
