@@ -1,5 +1,6 @@
 import { RequestMuxProperties } from "../../mux/request-mux"
 import { planGuard } from "../../utils/billing"
+import { getCurrentDate } from "../../utils/date"
 import { internalServerError } from "../../utils/errors"
 import { CustomExecutionContext } from "../../utils/middleware"
 import { buildURL, fetchWrapper } from "../../utils/stocks"
@@ -13,22 +14,27 @@ type TimeSeriesDailyProperties = {
 
 const METADATA_INFORMATION = "Daily Prices (open, high, low, close) and Volumes"
 
-const tracker: { [key: string]: Set<string> } = {}
-
-const guard = (request: Request, symbol: string, env: Env, ctx: CustomExecutionContext) => {
+const guard = async (request: Request, symbol: string, env: Env, ctx: CustomExecutionContext) => {
   const oid = ctx.user?.oid
   if (oid && planGuard(env.BASE_PLAN, ctx)) return false
-  const trackerKey = `${oid}-${request.cf?.latitude}-${request.cf?.longitude}`
-  if (trackerKey in tracker) { tracker[trackerKey].add(symbol) }
-  else tracker[trackerKey] = new Set<string>().add(symbol)
 
-  if (tracker[trackerKey].size > 3) return true
-  return false
+  const trackerKey = `${oid}-${request.cf?.latitude}-${request.cf?.longitude}`
+  const trackingData = JSON.parse(await env.LOKEEL_STOCK_SCREENER_KV.get(trackerKey) ?? '{}')
+  const key = getCurrentDate()
+  if (key in trackingData) {
+    trackingData[key] = new Set(trackingData[key]).add(symbol)
+  }
+  else trackingData[key] = new Set<string>().add(symbol)
+
+  let result = false
+  if (trackingData[key].size > 3) result = true
+  ctx.waitUntil(env.LOKEEL_STOCK_SCREENER_KV.put(trackerKey, JSON.stringify({ [key]: [...trackingData[key]] })))
+  return result
 }
 
 export const timeSeriesDaily = async ({ fn, symbol, outputsize, workerArgs }: TimeSeriesDailyProperties): Promise<Response> => {
   const { env, request, ctx } = workerArgs
-  if (guard(request, symbol, env, ctx)) return new Response("Rate limited, login, or upgrade account.", {
+  if (await guard(request, symbol, env, ctx)) return new Response("Rate limited, login, or upgrade account.", {
     status: 429
   })
 
