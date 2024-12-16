@@ -2,7 +2,9 @@ export enum ActionType {
   Navigate = "navigation/navigate",
   Redirect = "navigation/redirect",
   Identity = "navigation/identity",
-  RawIdentity = "navigation/raw-identity"
+  RawIdentity = "navigation/raw-identity",
+  RawCustomer = "navigation/raw-customer",
+  AuthUrl = "navigation/auth-url"
 }
 
 type NavigateActionType = {
@@ -15,7 +17,7 @@ type RedirectType = {
   payload: boolean
 }
 
-export type RawIdentityToken = string
+export type RawToken = string
 
 export type IdentityToken = {
   header: {
@@ -47,10 +49,20 @@ type IdentityType = {
 
 type RawIdentityType = {
   type: ActionType.RawIdentity;
-  payload: RawIdentityToken
+  payload: RawToken
 }
 
-export type Actions = NavigateActionType | RedirectType | IdentityType | RawIdentityType;
+type RawCustomerType = {
+  type: ActionType.RawCustomer;
+  payload: RawToken
+}
+
+type AuthUrlType = {
+  type: ActionType.AuthUrl;
+  payload: string
+}
+
+export type Actions = NavigateActionType | RedirectType | IdentityType | RawIdentityType | RawCustomerType | AuthUrlType;
 
 export const Navigate = (id: string): NavigateActionType => ({
   type: ActionType.Navigate,
@@ -67,7 +79,17 @@ export const Identity = (token: IdentityToken | null): IdentityType => ({
   payload: token
 })
 
-export const RawIdentity = (token: RawIdentityToken): RawIdentityType => ({
+export const RawIdentity = (token: RawToken): RawIdentityType => ({
   type: ActionType.RawIdentity,
   payload: token
+})
+
+export const RawCustomer = (token: RawToken): RawCustomerType => ({
+  type: ActionType.RawCustomer,
+  payload: token
+})
+
+export const AuthUrl = (url: string): AuthUrlType => ({
+  type: ActionType.AuthUrl,
+  payload: url
 })

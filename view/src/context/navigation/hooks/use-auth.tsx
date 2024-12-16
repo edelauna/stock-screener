@@ -1,15 +1,18 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
-import { navigationStore } from "../../context/navigation/navigation.provider"
-import { Identity, RawIdentity, Redirect } from "../../context/navigation/navigation.actions"
-import { errorStore } from "../../context/errors/errors.provider"
-import { Add } from "../../context/errors/errors.actions"
+import { errorStore } from "../../errors/errors.provider"
+import { Add } from "../../errors/errors.actions"
 
 const PKCE_KEY = 'pkce_verifier'
 
 type State = {
   value: string,
   expiry: number
+}
+
+type Tokens = {
+  id_token: string,
+  customer_token: string
 }
 
 const TEN_MINUTES = 10 * 60 * 1000
@@ -59,11 +62,13 @@ const scope = encodeURIComponent(`openid offline_access ${process.env.REACT_APP_
 const responseMode = 'fragment'
 
 export const useAuth = () => {
-  const {state, dispatch} = useContext(navigationStore)
+  //const {state, dispatch} = useContext(navigationStore)
   const {dispatch: errorDispatch} = useContext(errorStore)
   const [verifier, setVerifier] = useState(initializeVerifier())
   const [codeChallenge, setCodeChallenge] = useState<string|null>(null)
   const [ready, setReady] = useState(false)
+  const [loggingIn, setLoggingIn] = useState(false)
+  const [tokens, setTokens] = useState<Tokens>()
   const lastCodeRef = useRef('')
 
   useEffect(() => {
@@ -116,8 +121,8 @@ export const useAuth = () => {
           body: await response.text()
         }))
 
-        const {id_token} = await response.json()
-        dispatch(RawIdentity(id_token))
+        const {id_token, customer_token} = await response.json()
+        setTokens({id_token, customer_token})
       } catch (e){
         errorDispatch(Add({
           header: 'useAuth::There was an error fetching token',
@@ -126,33 +131,7 @@ export const useAuth = () => {
       } finally {
         setCodeChallenge(null)
         navigate('/')
-        dispatch(Redirect(false))
-      }
-    }
-
-    const doLogout = async (idToken: string) => {
-      const url = `${process.env.REACT_APP_API_URL}auth/logout`
-      try {
-        const response = await fetch(url, {
-          credentials: 'include',
-          redirect: 'follow',
-          headers: {
-            'Content-Type' : 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify({ id_token: idToken}),
-        })
-        const {redirect_uri} = await response.json()
-        window.location = redirect_uri
-      } catch (e){
-        errorDispatch(Add({
-          header: 'useAuth::There was an error fetching token',
-          body: (e as Error).message
-        }))
-      } finally {
-        setCodeChallenge(null)
-        navigate('/')
-        dispatch(Redirect(false))
+        setLoggingIn(false)
       }
     }
 
@@ -163,22 +142,17 @@ export const useAuth = () => {
         const code = params.get('code')
         if(code && lastCodeRef.current !== code) {
           lastCodeRef.current = code
-          dispatch(Redirect(true))
+          setLoggingIn(true)
           fetchData(code)
         }
       }
-      if(location.pathname.split('/')[2] === 'logout' && state.rawIdentityToken !== ''){
-        dispatch(Redirect(true))
-        doLogout(state.rawIdentityToken)
-        dispatch(RawIdentity(''))
-        dispatch(Identity(null))
-      }
     }
-  }, [location, verifier, dispatch, navigate, state.rawIdentityToken, errorDispatch])
-
+  }, [location, verifier, navigate, errorDispatch])
 
   return {
     ready,
+    loggingIn,
+    tokens,
     authURL: buildAuthURL()
   }
 }
