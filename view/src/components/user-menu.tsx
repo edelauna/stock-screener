@@ -3,7 +3,7 @@ import { LoginButton } from "./login-button";
 import { useNavigate } from "react-router";
 import { useContext } from "react";
 import { navigationStore } from "../context/navigation/navigation.provider";
-import { useCustomer } from "../hooks/billing/use-customer";
+import { useCustomer } from "../hooks/billing/use-customer-hook/use-customer";
 import { useManageCb } from "../hooks/billing/use-manage-cb";
 import { useUpgradeCb } from "../hooks/billing/use-upgrade-cb";
 
@@ -37,7 +37,7 @@ export const UserMenu = () => {
       {conditionalCustomerRender()}
       <MenuItem key={'logout'}>
         <Button
-          onClick={() => navigate('/auth/logout')}
+          onClick={() => navigate('/logout')}
           className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none w-full text-left"
         >
           Sign out

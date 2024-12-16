@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
-import { Actions, ActionType, Identity, IdentityToken } from "./navigation.actions";
+import React, { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import { Actions, ActionType, AuthUrl, Identity, IdentityToken, RawCustomer, RawIdentity, Redirect } from "./navigation.actions";
 import { PartialRSAJWK, usePublicKeys } from "../../hooks/auth/use-keys";
 import { errorStore } from "../errors/errors.provider";
 import { Add } from "../errors/errors.actions";
 import { useNavigate } from "react-router";
+import { useAuth } from "./hooks/use-auth";
+import { useLogout } from "./hooks/use-logout";
 
 export interface NavigationItem extends SimpleNavigationItem {
   current: boolean;
@@ -19,9 +21,12 @@ type State = {
   redirect: boolean
   identityToken: IdentityToken | null
   rawIdentityToken: string
+  rawCustomerToken: string
+  authUrl: string | null
 }
 
 const SESSION_STORAGE_KEY = 'identity_storage'
+const CUSTOMER_JWT_KEY = 'customer'
 
 const initialState: State = {
   navigation: [
@@ -30,7 +35,9 @@ const initialState: State = {
   ],
   redirect: false,
   identityToken: null,
-  rawIdentityToken: ''
+  rawIdentityToken: '',
+  rawCustomerToken: '',
+  authUrl: null,
 }
 
 type NavigationContext = {
@@ -68,6 +75,16 @@ const reducer: React.Reducer<State, Actions> = (
       return {
         ...state,
         rawIdentityToken: action.payload
+      }
+    case ActionType.RawCustomer:
+      return {
+        ...state,
+        rawCustomerToken: action.payload
+      }
+    case ActionType.AuthUrl:
+      return {
+        ...state,
+        authUrl: action.payload
       }
     default:
       return state
@@ -112,7 +129,8 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
     try {
       return {
         ...state,
-        rawIdentityToken: sessionStorage.getItem(SESSION_STORAGE_KEY) ?? ''
+        rawIdentityToken: sessionStorage.getItem(SESSION_STORAGE_KEY) ?? '',
+        rawCustomerToken: sessionStorage.getItem(CUSTOMER_JWT_KEY) ?? ''
       }
     } catch(e){
       errorDispatch(Add({
@@ -167,6 +185,35 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
 
   // save identity token to session storage
   useEffect(() => sessionStorage.setItem(SESSION_STORAGE_KEY, state.rawIdentityToken), [state.rawIdentityToken])
+  useEffect(() => sessionStorage.setItem(CUSTOMER_JWT_KEY, state.rawCustomerToken), [state.rawCustomerToken])
+
+  const {ready: authReady, authURL, tokens, loggingIn} = useAuth()
+
+  useEffect(() => {
+    if(authReady) dispatch(AuthUrl(authURL))
+  }, [authReady,authURL,dispatch])
+
+  useEffect(() => dispatch(Redirect(loggingIn)), [dispatch,loggingIn])
+
+  useEffect(() => {
+    if(tokens){
+      dispatch(RawIdentity(tokens.id_token))
+      dispatch(RawCustomer(tokens.customer_token))
+    }
+  }, [tokens, dispatch])
+
+  const loggingOutRef = useRef(false)
+  const {loggingOut} = useLogout(state.rawIdentityToken)
+
+  useEffect(() => {
+    if(loggingOutRef.current === true && loggingOut === false) {
+      // finished logging out
+      dispatch(RawIdentity(''))
+      dispatch(RawCustomer(''))
+    }
+    loggingOutRef.current = loggingOut
+    dispatch(Redirect(loggingOut))
+  }, [dispatch,loggingOut])
 
   return <Provider value={{state, dispatch}} children={children} />
 }

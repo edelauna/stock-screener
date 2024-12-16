@@ -26,10 +26,9 @@ const guard = async (request: Request, symbol: string, env: Env, ctx: CustomExec
   }
   else trackingData[key] = new Set<string>().add(symbol)
 
-  let result = false
-  if (trackingData[key].size > 3) result = true
+  if (trackingData[key].size > 3) return true
   ctx.waitUntil(env.LOKEEL_STOCK_SCREENER_KV.put(trackerKey, JSON.stringify({ [key]: [...trackingData[key]] })))
-  return result
+  return false
 }
 
 export const timeSeriesDaily = async ({ fn, symbol, outputsize, workerArgs }: TimeSeriesDailyProperties): Promise<Response> => {

@@ -1,6 +1,6 @@
 import { RequestMuxProperties } from "../mux/request-mux"
 import { Customer } from "./billing"
-import { CustomerCookie, verifyMessage } from "./cookies"
+import { CustomerJwt, verifyMessage } from "./cookies"
 import { Payload, verify } from "./jwt"
 import { refreshAccessToken } from "./tokens"
 
@@ -43,7 +43,7 @@ const validateCustomer = async (cookies: Cookies, env: Env, ctx: CustomExecution
   const partialJwt = cookies.customer
   if (!partialJwt) return
 
-  const { isValid, payload } = await verifyMessage<CustomerCookie>(partialJwt, env)
+  const { isValid, payload } = await verifyMessage<CustomerJwt>(partialJwt, env)
   if (isValid) {
     ctx.customer = payload.customer
   } else {

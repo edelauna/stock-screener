@@ -1,4 +1,4 @@
-import { CustomerCookie, signMessage } from "./cookies"
+import { CustomerJwt, signMessage } from "./cookies"
 import { internalServerError } from "./errors"
 import { verify } from "./jwt"
 import { CustomExecutionContext } from "./middleware"
@@ -53,7 +53,7 @@ export const pluckCustomerFields = (customer: Customer) => ({
 
 const blankCookie = `customer=; Path=/; Max-Age=0; SameSite=Strict`
 
-export const generateCustomerCookie = async (env: Env, ctx: CustomExecutionContext) => {
+export const generateCustomerJwt = async (env: Env, ctx: CustomExecutionContext) => {
   let oid = ctx.user?.oid
 
   if (!oid) return blankCookie
@@ -62,10 +62,10 @@ export const generateCustomerCookie = async (env: Env, ctx: CustomExecutionConte
 
   if (!customer) return blankCookie
 
-  return `customer=${await signMessage<CustomerCookie>({ oid, customer }, env)}; Path=/; SameSite=Strict`
+  return await signMessage<CustomerJwt>({ oid, customer }, env)
 }
 
-export const generateCustomerCookieSafely = async (access_token: string, env: Env, ctx: CustomExecutionContext) => {
+export const generateCustomerJwtSafely = async (access_token: string, env: Env, ctx: CustomExecutionContext) => {
   let oid = ctx.user?.oid
   if (!oid) {
     // verify access token incase just logged in
@@ -80,7 +80,7 @@ export const generateCustomerCookieSafely = async (access_token: string, env: En
   url.searchParams.append('expand[]', 'data.subscriptions')
 
   const response = await stripeFetchWrapper(url.toString(), env)
-  if (!response.ok) throw internalServerError(`generateCustomerCookie response was not ok`, { ...response })
+  if (!response.ok) throw internalServerError(`generateCustomerJwt response was not ok`, { ...response })
 
   const data = await response.json<CustomerSearchResult>()
 
@@ -90,7 +90,7 @@ export const generateCustomerCookieSafely = async (access_token: string, env: En
 
   ctx.customer = pluckCustomerFields(customer)
 
-  return await generateCustomerCookie(env, ctx)
+  return await generateCustomerJwt(env, ctx)
 }
 
 export const stripeFetchWrapper = async (input: RequestInfo, env: Env, init?: RequestInit) => {

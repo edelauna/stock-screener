@@ -1,7 +1,7 @@
 import { Customer } from "./billing";
 import { base64UrlDecoder, base64UrlEncoder } from "./jwt";
 
-export type CustomerCookie = {
+export type CustomerJwt = {
   customer: Customer,
   oid: string,
 }
