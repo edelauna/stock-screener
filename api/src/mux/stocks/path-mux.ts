@@ -13,7 +13,7 @@ export const pathMux = async ({ request, ...etc }: RequestMuxProperties): Promis
     case 'SYMBOL_SEARCH':
       const keywords = url.searchParams.get('keywords')
       return searchSymbolHandler({ fn, keywords, workerArgs })
-    case 'TIME_SERIES_DAILY': return (() => {
+    case 'TIME_SERIES_DAILY_ADJUSTED': return (() => {
       const symbol = url.searchParams.get('symbol') ?? ""
       const outputsize = url.searchParams.get('outputsize') ?? ""
       return timeSeriesDaily({ fn, symbol, outputsize, workerArgs })

@@ -12,13 +12,13 @@ type TimeSeriesDailyProperties = {
   workerArgs: RequestMuxProperties
 }
 
-const METADATA_INFORMATION = "Daily Prices (open, high, low, close) and Volumes"
+const METADATA_INFORMATION = "Daily Time Series with Splits and Dividend Events"
 
 const guard = async (request: Request, symbol: string, env: Env, ctx: CustomExecutionContext) => {
   const oid = ctx.user?.oid
   if (oid && planGuard(env.BASE_PLAN, ctx)) return false
 
-  const trackerKey = `${oid}-${request.cf?.latitude}-${request.cf?.longitude}`
+  const trackerKey = oid ? oid : `${request.cf?.latitude}:${request.cf?.longitude}`
   const trackingData = JSON.parse(await env.LOKEEL_STOCK_SCREENER_KV.get(trackerKey) ?? '{}')
   const key = getCurrentDate()
   if (key in trackingData) {

@@ -76,7 +76,7 @@ export const useTimeSeriesDaily = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const url = `${process.env.REACT_APP_API_URL}stocks?fn=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=full`
+      const url = `${process.env.REACT_APP_API_URL}stocks?fn=TIME_SERIES_DAILY_ADJUSTED&symbol=${ticker}&outputsize=full`
 
       try {
           setLoading(true)
