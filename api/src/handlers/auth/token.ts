@@ -1,5 +1,5 @@
 import { RequestMuxProperties } from "../../mux/request-mux";
-import { generateCustomerCookieSafely } from "../../utils/billing";
+import { generateCustomerJwtSafely } from "../../utils/billing";
 import { internalServerError } from "../../utils/errors";
 import { ResponseBody, SCOPE } from "../../utils/tokens";
 
@@ -32,14 +32,14 @@ export const tokenHandler = async ({ request, env, ctx }: RequestMuxProperties) 
 
     const { access_token, id_token, refresh_token } = await result.json<ResponseBody>()
 
-    const customerCookie = await generateCustomerCookieSafely(access_token, env, ctx)
+    const customerJwt = await generateCustomerJwtSafely(access_token, env, ctx)
 
     const cookies = [
       `access_token=${access_token}; Path=/; HttpOnly; Samesite=Strict`,
       `refresh_token=${refresh_token}; Path=/; HttpOnly; SameSite=Strict`,
-      customerCookie
+      `customer=${customerJwt}; Path=/; HttpOnly; SameSite=Strict`
     ];
-    const response = new Response(JSON.stringify({ id_token }), { status: 200 })
+    const response = new Response(JSON.stringify({ id_token, customer_token: customerJwt }), { status: 200 })
     cookies.forEach(c => response.headers.append('Set-Cookie', c))
     return response
   } catch (e) {

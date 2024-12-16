@@ -93,12 +93,12 @@ export const verify = async (jwt: string, env: Env, ctx: CustomExecutionContext)
 
   const payload: Payload = JSON.parse(base64UrlDecoder(parts[1]))
 
-  if (isVerified && payload.aud === env.AZURE_API_CLIENT_ID || payload.aud === env.AZURE_API_CLIENT_ID) {
+  if (isVerified && payload.aud === env.AZURE_API_CLIENT_ID) {
     isVerified = true
     ctx.user = payload
   }
 
-  if (payload.exp * 1000 < new Date().getTime()) expired = true
+  if (!payload.exp || payload.exp * 1000 < new Date().getTime()) expired = true
 
   return { isVerified, expired }
 }

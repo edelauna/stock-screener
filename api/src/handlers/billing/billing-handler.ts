@@ -1,5 +1,5 @@
 import { RequestMuxProperties } from "../../mux/request-mux";
-import { Customer, generateCustomerCookie, pluckCustomerFields, stripeFetchWrapper } from "../../utils/billing";
+import { Customer, generateCustomerJwt, pluckCustomerFields, stripeFetchWrapper } from "../../utils/billing";
 import { internalServerError } from "../../utils/errors";
 
 type PortalSession = {
@@ -61,10 +61,10 @@ export const handleRedirected = async ({ request, ctx, env }: RequestMuxProperti
   })
   ctx.waitUntil(updateCustomerPromise)
 
-  const customerCookie = await generateCustomerCookie(env, ctx)
-  return new Response(null, {
+  const customerJwt = await generateCustomerJwt(env, ctx)
+  return new Response(JSON.stringify({ customer_token: customerJwt }), {
     status: 200, headers: {
-      'Set-Cookie': customerCookie
+      'Set-Cookie': `customer=${customerJwt}; Path=/; HttpOnly; SameSite=Strict`
     }
   })
 }
