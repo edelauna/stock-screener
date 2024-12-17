@@ -25,4 +25,15 @@ beforeEach(() => {
     unobserve: jest.fn(),
     disconnect: jest.fn(),
   }))
+
+  Object.defineProperty(window, 'performance', {
+    value: {
+      getEntriesByType: jest.fn().mockReturnValue([
+        {
+          type: 'navigate',
+          toJSON: () => ({ type: 'navigate' }),
+        } as PerformanceNavigationTiming,
+      ]),
+    },
+  });
 });
