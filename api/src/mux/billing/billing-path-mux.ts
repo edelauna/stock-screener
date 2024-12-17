@@ -1,4 +1,4 @@
-import { handleMange, handleRedirected } from "../../handlers/billing/billing-handler";
+import { handleMange, handleRedirected, handleUpdate } from "../../handlers/billing/billing-handler";
 import { RequestMuxProperties } from "../request-mux";
 
 export const billingMux = async ({ request, ...etc }: RequestMuxProperties) => {
@@ -9,6 +9,8 @@ export const billingMux = async ({ request, ...etc }: RequestMuxProperties) => {
       return handleMange({ request, ...etc })
     case 'redirected':
       return handleRedirected({ request, ...etc })
+    case 'refresh':
+      return handleUpdate({ request, ...etc })
     default:
       return new Response("Not found", {
         status: 404

@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef } from "react"
-import { navigationStore } from "../../../../context/navigation/navigation.provider"
-import { errorStore } from "../../../../context/errors/errors.provider"
+import { navigationStore } from "../../../context/navigation/navigation.provider"
+import { errorStore } from "../../../context/errors/errors.provider"
 import { useNavigate } from "react-router"
-import { Add } from "../../../../context/errors/errors.actions"
-import { RawCustomer, Redirect } from "../../../../context/navigation/navigation.actions"
+import { Add } from "../../../context/errors/errors.actions"
+import { RawCustomer, Redirect } from "../../../context/navigation/navigation.actions"
 
-export const useUpdateCustomerData = (checkoutId: string | null) => {
+export const useUpdateCustomerDataWithCheckoutId = (checkoutId: string | null) => {
   const {dispatch} = useContext(navigationStore)
   const {dispatch: errorDispatch} = useContext(errorStore)
   const navigate = useNavigate()

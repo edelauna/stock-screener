@@ -1,19 +1,34 @@
 import { useContext, useEffect, useState } from "react"
 import { PartialRSAJWK, useLocalKey } from "../../auth/use-keys"
 import { navigationStore } from "../../../context/navigation/navigation.provider"
-import { useLocation, useNavigate } from "react-router"
 import { RawCustomer } from "../../../context/navigation/navigation.actions"
-import { errorStore } from "../../../context/errors/errors.provider"
-import { useUpdateCustomerData } from "./use-callbacks/use-update-customer-data"
 import { useVerifyCB } from "./use-callbacks/use-verify-cb"
 
+export type Customer = {
+  oid: string
+  customer: {
+    id: string,
+    object: 'customer',
+    metadata: {
+      oid?: string
+    },
+    subscriptions?: {
+      data: {
+        items: {
+          data: {
+            plan: {
+              id: string
+            }
+          }[]
+        }
+      }[]
+    }
+  }
+}
+
 export const useCustomer = () => {
-  const [customer, setCustomer] = useState()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [checkoutId, setCheckoutId] = useState<string | null>(null)
+  const [customer, setCustomer] = useState<Customer | undefined>()
   const {state, dispatch} = useContext(navigationStore)
-  const {dispatch: errorDispatch} = useContext(errorStore)
 
   const { localKey } = useLocalKey()
   const verifyCB = useVerifyCB()
@@ -29,16 +44,6 @@ export const useCustomer = () => {
     }
     if(localKey && state.rawCustomerToken !== '') verify(localKey, state.rawCustomerToken)
   }, [localKey, state.rawCustomerToken, verifyCB])
-
-  useUpdateCustomerData(checkoutId)
-
-  useEffect(() => {
-    if(location.pathname.startsWith('/checkout_redirected')){
-      const search = new URLSearchParams(location.search)
-      const checkoutId = search.get('checkout_session_id')
-      setCheckoutId(checkoutId)
-    }
-  }, [location, dispatch, errorDispatch, navigate])
 
   useEffect(() => {
     if(state.rawCustomerToken !== '' && state.rawIdentityToken === ''){
