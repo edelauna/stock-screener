@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react"
+import { useCallback, useContext, useRef } from "react"
 import { errorStore } from "../../context/errors/errors.provider"
 import { Add } from "../../context/errors/errors.actions"
 import { Redirect } from "../../context/navigation/navigation.actions"
@@ -7,11 +7,14 @@ import { navigationStore } from "../../context/navigation/navigation.provider"
 export const useManageCb = () => {
   const {dispatch} = useContext(navigationStore)
   const {dispatch: errorDispatch} = useContext(errorStore)
+  const isFetching = useRef(false)
 
   const manageOnClick = useCallback(() => {
     const generateSesionURL = async () => {
+      if(isFetching.current) return
       const apiUrl = `${process.env.REACT_APP_API_URL}billing/manage`
       try {
+        isFetching.current = true
         const response = await fetch(apiUrl, {
           credentials: 'include',
           redirect: 'follow',
@@ -26,6 +29,7 @@ export const useManageCb = () => {
           body: (e as Error).message
         }))
       } finally {
+        isFetching.current = false
         dispatch(Redirect(false))
       }
     }

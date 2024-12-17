@@ -14,7 +14,7 @@ export const handleMange = async ({ ctx, env }: RequestMuxProperties) => {
   const { customer } = ctx
   if (customer) {
     const stripeUrl = 'https://api.stripe.com/v1/billing_portal/sessions'
-    const body = new URLSearchParams({ return_url: env.AZURE_SPA_REDIRECT_URI })
+    const body = new URLSearchParams({ return_url: `${env.ALLOWED_ORIGIN}/managed_redirected` })
     body.append('customer', customer.id)
     const response = await stripeFetchWrapper(stripeUrl, env, {
       method: 'POST',
@@ -60,6 +60,26 @@ export const handleRedirected = async ({ request, ctx, env }: RequestMuxProperti
     body: new URLSearchParams({ 'metadata[oid]': oid })
   })
   ctx.waitUntil(updateCustomerPromise)
+
+  const customerJwt = await generateCustomerJwt(env, ctx)
+  return new Response(JSON.stringify({ customer_token: customerJwt }), {
+    status: 200, headers: {
+      'Set-Cookie': `customer=${customerJwt}; Path=/; HttpOnly; SameSite=Strict`
+    }
+  })
+}
+
+export const handleUpdate = async ({ request, ctx, env }: RequestMuxProperties) => {
+  const { id } = ctx.customer ?? {}
+  if (!id) return internalServerError('no customer_id found.')
+
+  const query = new URLSearchParams({ 'expand[]': 'subscriptions' })
+  const customerResponse = await stripeFetchWrapper(`https://api.stripe.com/v1/customers/${id}?${query}`, env)
+  if (!customerResponse.ok) return internalServerError('customerResponse was not ok', { text: await customerResponse.text() })
+
+  const customer = await customerResponse.json<Customer>()
+
+  ctx.customer = pluckCustomerFields(customer)
 
   const customerJwt = await generateCustomerJwt(env, ctx)
   return new Response(JSON.stringify({ customer_token: customerJwt }), {

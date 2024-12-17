@@ -6,6 +6,7 @@ import { navigationStore } from "../context/navigation/navigation.provider";
 import { useCustomer } from "../hooks/billing/use-customer-hook/use-customer";
 import { useManageCb } from "../hooks/billing/use-manage-cb";
 import { useUpgradeCb } from "../hooks/billing/use-upgrade-cb";
+import { useUpdateCustomer } from "../hooks/billing/use-customer-hook/use-update-customer";
 
 export const UserMenu = () => {
   const navigate = useNavigate()
@@ -13,6 +14,7 @@ export const UserMenu = () => {
   const {customer} = useCustomer()
   const manageOnClick = useManageCb()
   const upgradeCb = useUpgradeCb()
+  useUpdateCustomer()
 
   const conditionalCustomerRender = () => customer ?
   <MenuItem key={'Mange'}>
