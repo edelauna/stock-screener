@@ -177,8 +177,13 @@ export const useTimeSeriesDaily = () => {
 
       const dataStore = objectStores.objectStore(TIME_SERIES_DAILY_STORE_NAME)
       data.forEach((value) => dataStore.put(value))
+
+      objectStores.onerror = (ev) => dispatch(Add({
+        header: "useTimeSeriesDaily::There was an error saving data into indexDB",
+        body: JSON.stringify(ev)
+      }))
     }
-  }, [db, active, data])
+  }, [db, active, data, dispatch])
 
   useEffect(() => {
     if (!active && db) {
@@ -186,8 +191,13 @@ export const useTimeSeriesDaily = () => {
 
       const metadataStore = objectStores.objectStore(TIME_SERIES_DAILY_METADATA_STORE_NAME)
       metadataStore.put(metadata)
+
+      objectStores.onerror = (ev) => dispatch(Add({
+        header: "useTimeSeriesDaily::There was an error saving data into indexDB",
+        body: JSON.stringify(ev)
+      }))
     }
-  }, [db, active, metadata])
+  }, [db, active, metadata, dispatch])
 
   return {
     data,

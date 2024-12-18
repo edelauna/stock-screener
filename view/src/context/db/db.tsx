@@ -1,7 +1,7 @@
 import { SymbolSearchResult } from "../../hooks/use-symbol-search";
 import { TimeSeriesDayData } from "../../hooks/use-time-series-daily/use-time-series-daily";
 
-export const INDEX_DB_VERSION = 2;
+export const INDEX_DB_VERSION = 3;
 export const INDEX_DB_NAME = 'webDB';
 
 export const TIME_SERIES_DAILY_STORE_NAME = "time-series-daily"
@@ -55,24 +55,40 @@ const STORE_CONFIGS: DBConfig[] = [{
   keyPath: 'symbol',
   indexes: [],
   implementedInVersion: 2
+},{
+  store: TIME_SERIES_DAILY_STORE_NAME,
+  keyPath: 'id',
+  indexes: [{
+    field: 'date', unique: false
+  }],
+  implementedInVersion: 3
 }]
 
 interface OnUpdateNeededCallbackOptions {
   oldVersion: number,
+  transaction: IDBTransaction
 }
 
-export const onUpgradeNeededCallBack = (db: IDBDatabase, {oldVersion}: OnUpdateNeededCallbackOptions) => {
-  debugger;
+export const onUpgradeNeededCallBack = (db: IDBDatabase, {oldVersion, transaction}: OnUpdateNeededCallbackOptions) => {
   STORE_CONFIGS.forEach((config) => {
     if(config.implementedInVersion > oldVersion){
       // create object stores
-      const objectStore = db.createObjectStore(config.store, {keyPath: config.keyPath})
-      
+      let objectStore: IDBObjectStore
+      if(!db.objectStoreNames.contains(config.store)){
+        objectStore = db.createObjectStore(config.store, {keyPath: config.keyPath})
+      } else {
+        objectStore = transaction.objectStore(config.store)
+      }
+
+
       // create indees
       config.indexes.forEach((idx) => {
+        if (objectStore.indexNames.contains(idx.field)) {
+          objectStore.deleteIndex(idx.field);
+        }
         objectStore.createIndex(idx.field, idx.field, {unique: idx.unique})
       })
-    }    
+    }
   })
 
 }

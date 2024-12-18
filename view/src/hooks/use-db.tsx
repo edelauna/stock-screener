@@ -24,12 +24,14 @@ export const useDb = () => {
       }
 
       request.onupgradeneeded = (event) => {
+        const request = event.target as IDBOpenDBRequest
         setActive(true)
-        const onUpgradeDb = (event.target as IDBOpenDBRequest).result
+        const transaction = request.transaction!!
+        const onUpgradeDb = request.result
         onUpgradeDb.onerror = (event) => setErrorCb(event.target as IDBOpenDBRequest)
         const {oldVersion} = event
-        onUpgradeNeededCallBack(onUpgradeDb, {oldVersion});
-        (onUpgradeDb.transaction as unknown as IDBTransaction).oncomplete = (ev: Event) => {
+        onUpgradeNeededCallBack(onUpgradeDb, {oldVersion, transaction});
+        transaction.oncomplete = (ev: Event) => {
           setDb(onUpgradeDb);
           setActive(false)
         }
