@@ -1,5 +1,5 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { generateRSIannotations, generateTimeDailySeries, limitXAxis } from '../utils/chart';
 import { format, addMinutes } from 'date-fns';
@@ -28,7 +28,6 @@ export const Chart: React.FC = () => {
   const inputSymbol = symbolState.activeSymbol['1. symbol']
   const {data, metadata, loading} = useTimeSeriesDaily()
   const ticker = metadata['2. Symbol']
-  const currentTickerRef = useRef("")
   const [series, setSeriees] = useState<ApexAxisChartSeries>([{name: input, data:[[]]}])
   const [yAxisRange, setYAxisRange] = useState<AxisRange>({
     min: 200,
@@ -72,6 +71,7 @@ export const Chart: React.FC = () => {
       filteredData.push(twoDArray[indexToRetrieve])
     }
 
+    // todo: optimize to just process the view window - then continue remainder
     const [annotations, lastRSI] = generateRSIannotations(filteredData, rsiPeriod)
     if(annotations) setXAnnotations(annotations)
     if(lastRSI) {
@@ -87,20 +87,18 @@ export const Chart: React.FC = () => {
   }, [rsiPeriod]);
 
   useEffect(() => {
-    if(ticker !== inputSymbol){
-      setSeriees([{name: input, data:[[]]}])
+    if(!loading && ticker === inputSymbol){
+      if(data.length > 0){
+        const generatedData = generateTimeDailySeries(data).reverse()
+        setSeriees([{
+          name: input,
+          data: generatedData
+        }])
+      } else {
+        setSeriees([{name: input, data:[[]]}])
+      }
+    } else {
       setIndicatorLoading(true)
-    }
-  }, [ticker, inputSymbol, input])
-
-  useEffect(() => {
-    if(!loading && data.length > 0 && ticker === inputSymbol && ticker !== currentTickerRef.current){
-      currentTickerRef.current = ticker
-      const generatedData = generateTimeDailySeries(data).reverse()
-      setSeriees([{
-        name: input,
-        data: generatedData
-      }])
     }
   }, [loading, data, input, ticker, inputSymbol])
 
