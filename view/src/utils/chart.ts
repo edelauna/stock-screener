@@ -5,11 +5,7 @@ export type Series = number[][]
 export const generateTimeDailySeries = (input: TimeSeriesDailyRow[]): Series => {
   return input.map((row, i) => [
     new Date(row.date).getTime(),
-    i === (input.length - 1) ?
-      // for the last entry will use the close since this will be displayed - will need to update it for real time quote
-      parseFloat(row["4. close"]) :
-      // conver to cents and round to nearest cent before converting back to dollars to calculate mid
-      Math.round((parseFloat(row["2. high"]) + parseFloat(row["3. low"])) * 100 / 2) / 100
+    Math.round(parseFloat(row["5. adjusted close"]) * 100) / 100
   ])
 }
 type Slider = {
