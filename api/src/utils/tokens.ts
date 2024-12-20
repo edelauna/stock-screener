@@ -1,4 +1,3 @@
-import { internalServerError } from "./errors";
 import { CustomExecutionContext } from "./middleware";
 
 export type ResponseBody = {
@@ -39,5 +38,4 @@ export const refreshAccessToken = async (refresToken: string, env: Env, ctx: Cus
   } else {
     return false
   }
-
 }
