@@ -52,10 +52,11 @@ describe('worker', () => {
 	it('correctly sets CORS headers', async () => {
 		const request = new IncomingRequest('http://example.com');
 		const ctx = createExecutionContext() as CustomExecutionContext;
-		const response = await worker.fetch(request, env, ctx);
+		const mockEnv = { ...env, ALLOWED_ORIGIN: 'http://example.com' }
+		const response = await worker.fetch(request, mockEnv, ctx);
 		await waitOnExecutionContext(ctx);
 
-		expect(response.headers.get('Access-Control-Allow-Origin')).toBe(env.ALLOWED_ORIGIN);
+		expect(response.headers.get('Access-Control-Allow-Origin')).toBe('http://example.com');
 
 		expect(response.headers.get('Access-Control-Allow-Methods')).toBe('GET, POST, OPTIONS');
 		expect(response.headers.get('Access-Control-Allow-Headers')).toBe('Content-Type, Authorization');

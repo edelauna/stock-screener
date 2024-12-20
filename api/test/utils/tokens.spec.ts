@@ -15,21 +15,24 @@ describe('refreshAccessToken function', () => {
 
   it('should successfully refresh the access token', async () => {
     const ctx: CustomExecutionContext = createExecutionContext();
-
+    const mockEnv = {
+      ...env,
+      AZURE_AD_TOKEN_URL: 'https://token/endpoint'
+    }
     const refreshToken = 'dummy-refresh-token';
 
     // Mock the fetch request to return a successful response
-    fetchMock.get('https://lokeel.b2clogin.com')
+    fetchMock.get('https://token')
       .intercept({
         method: 'POST',
-        path: 'lokeel.onmicrosoft.com/B2C_1_simple_screener_lokeel_user_flow/oauth2/v2.0/token'
+        path: '/endpoint'
       })
       .reply(200, {
         access_token: 'new-access-token',
         refresh_token: 'new-refresh-token'
       });
 
-    const result = await refreshAccessToken(refreshToken, env, ctx);
+    const result = await refreshAccessToken(refreshToken, mockEnv, ctx);
 
     expect(result).toBe(true);
     expect(ctx.newAccessToken).toBe('new-access-token');
@@ -38,18 +41,21 @@ describe('refreshAccessToken function', () => {
 
   it('should return false if the token refresh fails', async () => {
     const ctx: CustomExecutionContext = createExecutionContext();
-
+    const mockEnv = {
+      ...env,
+      AZURE_AD_TOKEN_URL: 'https://token/endpoint'
+    }
     const refreshToken = 'dummy-refresh-token';
 
     // Mock the fetch request to return a failed response
-    fetchMock.get('https://lokeel.b2clogin.com')
+    fetchMock.get('https://token')
       .intercept({
         method: 'POST',
-        path: 'lokeel.onmicrosoft.com/B2C_1_simple_screener_lokeel_user_flow/oauth2/v2.0/token'
+        path: '/endpoint'
       })
       .reply(400, 'Refresh token has expired.');
 
-    const result = await refreshAccessToken(refreshToken, env, ctx);
+    const result = await refreshAccessToken(refreshToken, mockEnv, ctx);
 
     expect(result).toBe(false);
     expect(ctx.newAccessToken).toBeUndefined(); // Check that new tokens are not set
