@@ -308,7 +308,7 @@ export const Chart: React.FC = () => {
 
   return (
     <div className="w-full h-100">
-      {indicatorLoading ? <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>:
+      {indicatorLoading ? <div data-testid="loading-indicator" className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>:
         <div className="flex items-baseline">
           <Indicator />
           <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">

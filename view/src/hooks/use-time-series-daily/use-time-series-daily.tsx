@@ -20,7 +20,7 @@ export interface TimeSeriesDayData{
   "7. dividend amount": string,
   "8. split coefficient": string
 }
-interface MetaData {
+export interface MetaData {
   symbol: string,
   "1. Information": string,
   "2. Symbol": string,

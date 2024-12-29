@@ -20,7 +20,6 @@ export const useUpdateCustomerData = (stale: boolean) => {
         });
 
         if (!response.ok) {
-          console.log('Fetch response not ok');
           errorDispatch(Add({
             header: 'useUpdateCustomerData::updateCustomerData customer Data response not ok',
             body: await response.text()

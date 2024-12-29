@@ -54,7 +54,7 @@ export const useLocalKey = () => {
     const fetchKey = async () => {
       const url = `${process.env.REACT_APP_API_URL}keys`
       const response = await fetch(url)
-      setLocalKey(await response.json())
+        setLocalKey(await response.json())
     }
     if(!localFetched.current) {
       localFetched.current = true
