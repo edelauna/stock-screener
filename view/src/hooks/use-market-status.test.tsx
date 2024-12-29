@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { errorStore } from "../context/errors/errors.provider";
 import {initialState, store} from '../context/market-status/market-status.provider'
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useMarketStatus } from "./use-market-status";
 
 jest.mock('react', () => ({

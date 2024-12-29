@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { errorStore } from "../../context/errors/errors.provider";
 import {store} from '../../context/symbol-search/symbol-search.provider'
 import { createSymbolSearchResult } from "../../test-utils/symbol-search-result-factory.test";
-import { useDb } from "../use-db";
 import { formattedDateTime } from "../../utils/dateTime";
 import { createMetaData } from "../../test-utils/time-series/metadata-factory.test";
 import { createTimeSeriesDayData } from "../../test-utils/time-series/time-series-daily-factory.test";

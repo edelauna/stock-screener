@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { navigationStore } from "../../context/navigation/navigation.provider";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useObserver } from "./use-observer";
 import { mockIntersectionObserver } from "../../setupTests";
 

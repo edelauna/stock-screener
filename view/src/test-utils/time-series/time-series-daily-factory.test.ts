@@ -1,4 +1,3 @@
-import { data } from "react-router";
 import { TimeSeriesDailyRow } from "../../context/db/db";
 
 export const createTimeSeriesDayData = (overrides?: Partial<TimeSeriesDailyRow>): TimeSeriesDailyRow => {
