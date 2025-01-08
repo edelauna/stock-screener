@@ -6,7 +6,7 @@ export interface Data {
   markets: GlobalMarketData[],
 }
 
-interface GlobalMarketData {
+export interface GlobalMarketData {
   "market_type": string,
   "region": string,
   "primary_exchanges": string,
@@ -24,7 +24,7 @@ export interface State {
 
 const MARKET_STATUS_STORE_NAME = "market-status"
 
-const initialState = {
+export const initialState = {
   currentRef: "",
   initializing: true,
   markets: []

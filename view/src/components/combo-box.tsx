@@ -6,7 +6,7 @@ import { SymbolSearchResult, useSymbolSearch } from '../hooks/use-symbol-search'
 import { store } from '../context/symbol-search/symbol-search.provider';
 import { UpdateActiveSymbol } from '../context/symbol-search/symbol-search.actions';
 
-export default function Example() {
+export default function ComboBox() {
   const {state, dispatch} = useContext(store)
   const [query, setQuery] = useState<string>('');
   const [selected, setSelected] = useState<SymbolSearchResult |null>(state.activeSymbol);
@@ -31,8 +31,8 @@ export default function Example() {
           <ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
             {
               data.length > 0 ?
-                <ChevronDownIcon className="h-4 w-4 text-gray-600 group-hover:text-blue-500" /> :
-                <MagnifyingGlassIcon className="h-4 w-4 text-gray-600 group-hover:text-blue-500" />}
+                <ChevronDownIcon data-testid="ChevronDownIcon" className="h-4 w-4 text-gray-600 group-hover:text-blue-500" /> :
+                <MagnifyingGlassIcon data-testid="MagnifyingGlassIcon" className="h-4 w-4 text-gray-600 group-hover:text-blue-500" />}
           </ComboboxButton>
         </div>
 

@@ -62,7 +62,6 @@ const scope = encodeURIComponent(`openid offline_access ${process.env.REACT_APP_
 const responseMode = 'fragment'
 
 export const useAuth = () => {
-  //const {state, dispatch} = useContext(navigationStore)
   const {dispatch: errorDispatch} = useContext(errorStore)
   const [verifier, setVerifier] = useState(initializeVerifier())
   const [codeChallenge, setCodeChallenge] = useState<string|null>(null)
@@ -70,6 +69,12 @@ export const useAuth = () => {
   const [loggingIn, setLoggingIn] = useState(false)
   const [tokens, setTokens] = useState<Tokens>()
   const lastCodeRef = useRef('')
+
+  useEffect(() => {
+    const poll = () => setCodeChallenge(null) // clear challenge every 10 minutes to check for verified expiry
+    const intervalId = setInterval(poll, TEN_MINUTES);
+    return () => clearInterval(intervalId);
+  });
 
   useEffect(() => {
     const generateCodeChallenge = async () => {

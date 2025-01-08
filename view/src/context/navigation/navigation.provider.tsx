@@ -16,7 +16,7 @@ export interface SimpleNavigationItem {
   name: string;
 }
 
-type State = {
+export type State = {
   navigation: NavigationItem[];
   redirect: boolean
   identityToken: IdentityToken | null
@@ -28,7 +28,7 @@ type State = {
 const SESSION_STORAGE_KEY = 'identity_storage'
 const CUSTOMER_JWT_KEY = 'customer'
 
-const initialState: State = {
+export const initialState: State = {
   navigation: [
     { name: 'Home', id: 'home', current: true },
     { name: 'About', id: 'about', current: false },
@@ -140,6 +140,16 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
       return state
     }
   })
+
+  //ttl for redirect
+  useEffect(() => {
+    if(state.redirect){
+      const poll = () => dispatch(Redirect(false)) // should've happened by 5 seconds
+      const intervalId = setInterval(poll, 5000);
+      return () => clearInterval(intervalId)
+    }
+  },[state.redirect])
+
   const { publicKeys } = usePublicKeys()
   const navigate = useNavigate()
 
@@ -156,7 +166,6 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
       try {
         const header = JSON.parse(base64UrlDecoder(parts[0]))
         const payload: IdentityToken["payload"] = JSON.parse(base64UrlDecoder(parts[1]))
-
         if(validSignature && payload.aud === process.env.REACT_APP_AUTH_CLIENT_ID && (payload.exp * 1000 > new Date().getTime())){
           dispatch(Identity({header, payload, signature: parts[2]}))
         } else {

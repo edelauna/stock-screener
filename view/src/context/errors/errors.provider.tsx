@@ -8,13 +8,13 @@ export type ErrorDialog = {
   body: string
 }
 
-type State = {
+export type State = {
   errors: ErrorDialog[],
   show: boolean
   showCTA: boolean
 }
 
-const initialState = {
+export const initialState = {
   errors: [],
   show: false,
   showCTA: false
@@ -33,7 +33,7 @@ export const errorStore = createContext<ErrorContext>({
   dispatch: () => null,
 });
 
-const reducer: React.Reducer<State, Actions> = (
+export const reducer: React.Reducer<State, Actions> = (
   state: State,
   action: Actions,
 ) => {

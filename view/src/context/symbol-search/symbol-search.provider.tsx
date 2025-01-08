@@ -14,7 +14,7 @@ export interface State {
   busy: boolean
 }
 
-const initialState = {
+export const initialState = {
   currentInputRef: "",
   currentDataRef: "",
   busy: false,

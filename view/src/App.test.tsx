@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
@@ -7,7 +6,7 @@ jest.mock('./components/chart.tsx', () => ({
   Chart: () => <div>Mock Chart</div>
 }));
 
-test('renders learn react link', async () => {
+test('renders about project link', async () => {
   render(<App />);
   const linkElement = screen.getByText(/Check out the project on /i);
   expect(linkElement).toBeInTheDocument();

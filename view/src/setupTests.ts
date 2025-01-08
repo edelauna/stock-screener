@@ -5,18 +5,22 @@
 import '@testing-library/jest-dom';
 import { webcrypto } from 'crypto';
 import "fake-indexeddb/auto";
+import { setupServer } from 'msw/node';
 import { TextEncoder } from 'util'
 
 global.TextEncoder = TextEncoder
 global.crypto = webcrypto as Crypto
 
+export const mockIntersectionObserver = jest.fn();
+
+global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
+
 beforeEach(() => {
   // IntersectionObserver isn't available in test environment
-  const mockIntersectionObserver = jest.fn();
   mockIntersectionObserver.mockReturnValue({
-    observe: () => null,
-    unobserve: () => null,
-    disconnect: () => null
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn()
   });
   window.IntersectionObserver = mockIntersectionObserver;
 
@@ -27,6 +31,7 @@ beforeEach(() => {
   }))
 
   Object.defineProperty(window, 'performance', {
+    writable: true,
     value: {
       getEntriesByType: jest.fn().mockReturnValue([
         {
@@ -37,3 +42,11 @@ beforeEach(() => {
     },
   });
 });
+
+// mws
+export const mswServer = setupServer()
+
+beforeAll(() => mswServer.listen())
+
+afterAll(() => mswServer.close())
+afterEach(() => mswServer.resetHandlers())

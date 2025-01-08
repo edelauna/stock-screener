@@ -1,4 +1,4 @@
-import { Button, Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Button, Menu, MenuItem, MenuItems } from "@headlessui/react";
 import { LoginButton } from "./login-button";
 import { useNavigate } from "react-router";
 import { useContext } from "react";
@@ -53,9 +53,7 @@ export const UserMenu = () => {
       {/* Profile dropdown */}
       <Menu as="div" className="relative ml-3">
         <div>
-          <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-            <LoginButton />
-          </MenuButton>
+          <LoginButton />
         </div>
         {conditionalUserMenuRender()}
       </Menu>
