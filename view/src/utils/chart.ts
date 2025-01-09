@@ -51,7 +51,11 @@ export const limitXAxis = (min: number, max: number): number[] => {
 }
 
 export const generateRSIannotations = (data: number[][], period: number): [ApexAnnotations, number] | null[] => {
-  const rsiValues = []
+  if (data.length < period + 1) {
+    return [null, null];
+  }
+
+  const rsiValues = new Array(data.length - period).fill(0);
   let gains: number[] = []
   let losses: number[] = []
 
@@ -59,11 +63,13 @@ export const generateRSIannotations = (data: number[][], period: number): [ApexA
     const change = data[i - 1][1] - data[i][1]
     if (change > 0) {
       gains = [...gains, change]
-      losses = [...losses, Number.EPSILON]
+      losses = [...losses, -Number.EPSILON]
+    } else if (change < 0) {
+      gains = [...gains, Number.EPSILON]
+      losses = [...losses, change]
     } else {
       gains = [...gains, Number.EPSILON]
-      // invert loss since it'll be used as a denominator
-      losses = [...losses, change]
+      losses = [...losses, -Number.EPSILON]
     }
     if (i >= period) {
       const rsiIdx = i - period
