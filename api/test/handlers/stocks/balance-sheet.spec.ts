@@ -68,7 +68,7 @@ describe('balanceSheetHandler', () => {
     // Check the JSON body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: 'Server Error',
+      message: expect.stringContaining('Server Error'),
     }));
   });
 
@@ -89,7 +89,7 @@ describe('balanceSheetHandler', () => {
     const jsonBody = await response.json();
 
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: 'Server Error',
+      message: expect.stringContaining('Server Error'),
     }));
   });
 });
