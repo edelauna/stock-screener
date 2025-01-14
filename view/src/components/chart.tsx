@@ -6,6 +6,7 @@ import { format, addMinutes } from 'date-fns';
 import {store as symbolStore} from '../context/symbol-search/symbol-search.provider'
 import { formattedDate } from '../utils/date';
 import { useTimeSeriesDaily } from '../hooks/use-time-series-daily/use-time-series-daily';
+import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
 
 type AxisRange = {
   min: number;
@@ -306,6 +307,16 @@ export const Chart: React.FC = () => {
     }
   }
 
+  const formattedDateString = formattedDate(indicator.date, 'UTC');
+  // Split the string by '-' to get year, month, and day
+  const [year, month, day] = formattedDateString.split('-');
+
+  // Compare with today's date
+  const isNotToday = 
+    !(parseInt(day, 10) === today.getDate() && 
+      parseInt(month, 10) - 1 === today.getMonth() && // Month in JavaScript is 0-indexed
+      parseInt(year, 10) === today.getFullYear());
+
   return (
     <div className="w-full h-100">
       {indicatorLoading ? <div data-testid="loading-indicator" className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>:
@@ -315,8 +326,13 @@ export const Chart: React.FC = () => {
             Price: {indicator.price} {symbolState.activeSymbol['8. currency']}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-            as of: {formattedDate(indicator.date ,'UTC')}
+            as of: {formattedDateString}
           </span>
+          {isNotToday && <div className="group relative flex">
+            <ExclamationCircleIcon className='block size-5 text-yellow-500 hover:text-yellow-600'/>
+            <span className="absolute bottom-10 scale-0 transition-all rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100">End of Day Quote</span>
+          </div>
+          }
       </div>
       }
       <div id="wrapper">
