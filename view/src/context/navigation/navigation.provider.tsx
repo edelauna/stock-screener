@@ -169,14 +169,16 @@ export const NavigationProvider = ({children}: {children: React.ReactNode}) => {
         if(validSignature && payload.aud === process.env.REACT_APP_AUTH_CLIENT_ID && (payload.exp * 1000 > new Date().getTime())){
           dispatch(Identity({header, payload, signature: parts[2]}))
         } else {
-          navigate('/auth/logout')
+          dispatch(RawIdentity(''))
+          dispatch(RawCustomer(''))
         }
       } catch (e) {
         errorDispatch(Add({
           header: 'NavigationProvider:validate:error:',
           body: (e as Error).message
         }))
-        navigate('/auth/logout')
+        dispatch(RawIdentity(''))
+        dispatch(RawCustomer(''))
       }
     }
 
