@@ -21,7 +21,7 @@ export const useManageCb = () => {
         })
         if(response.ok){
           const { url } = await response.json()
-          window.location = url
+          window.open(url, "_blank")
         }
       } catch (e){
         errorDispatch(Add({
