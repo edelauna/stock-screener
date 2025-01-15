@@ -54,6 +54,8 @@ export const timeSeriesDaily = async ({ fn, symbol, outputsize, workerArgs }: Ti
     if (check) {
       return response
     } else {
+      const cache = caches.default
+      ctx.waitUntil(cache.delete(url.toString()))
       return internalServerError("Unexpected data structure returned", { data })
     }
   } catch (e) {

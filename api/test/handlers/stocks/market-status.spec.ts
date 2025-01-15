@@ -67,7 +67,7 @@ describe('marketStatus', () => {
     // Check the JSON body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: "Server Error"
+      message: expect.stringContaining("Server Error")
     }));
   });
 
@@ -88,7 +88,7 @@ describe('marketStatus', () => {
     // Check the JSON body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: "Server Error"
+      message: expect.stringContaining("Server Error")
     }));
   });
 });

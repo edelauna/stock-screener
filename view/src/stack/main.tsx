@@ -35,14 +35,16 @@ const Main = () => {
       {isLoading()}
     <div className={navigationState.redirect ? 'opacity-20' : ''}>
       <NavBar />
-        <ErrorBanner />
-        <Header />
-        <main>
-          <div className={`mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${state.activeSymbol['1. symbol'] !== '' ? '' : 'hidden'}`}>
-            <Chart />
-          </div>
-          <About ref={aboutRef} />
-        </main>
+        <div className="pt-16">
+          <ErrorBanner />
+          <Header />
+          <main>
+            <div className={`mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${state.activeSymbol['1. symbol'] !== '' ? '' : 'hidden'}`}>
+              <Chart />
+            </div>
+            <About ref={aboutRef} />
+          </main>
+        </div>
       </div>
     </div>
   );

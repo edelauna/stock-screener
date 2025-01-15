@@ -93,7 +93,7 @@ describe('timeSeriesDaily', () => {
     // Check the JSON body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: 'Server Error'
+      message: expect.stringContaining('Server Error')
     }));
   });
 
@@ -114,7 +114,7 @@ describe('timeSeriesDaily', () => {
     const jsonBody = await response.json();
 
     expect(jsonBody).toEqual(expect.objectContaining({
-      message: 'Server Error'
+      message: expect.stringContaining('Server Error')
     }));
   });
 

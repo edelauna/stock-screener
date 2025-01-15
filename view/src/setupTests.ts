@@ -13,6 +13,8 @@ global.crypto = webcrypto as Crypto
 
 export const mockIntersectionObserver = jest.fn();
 
+export const mockWindowOpen = jest.fn();
+
 global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
 
 beforeEach(() => {
@@ -41,6 +43,8 @@ beforeEach(() => {
       ]),
     },
   });
+
+  window.open = mockWindowOpen
 });
 
 // mws

@@ -8,6 +8,6 @@ jest.mock('./components/chart.tsx', () => ({
 
 test('renders about project link', async () => {
   render(<App />);
-  const linkElement = screen.getByText(/Check out the project on /i);
+  const linkElement = screen.getByText(/or ask questions on /i);
   expect(linkElement).toBeInTheDocument();
 });

@@ -8,7 +8,7 @@ export const internalServerError = async (msg: String, ctx: {} | null = null): P
     ...ctx
   })
   return new Response(JSON.stringify({
-    message: "Server Error",
+    message: "Server Error, may be as a result of rate limits, retrying again in 1 minute could possibly have a differant result.",
     requestId
   }), {
     status: 500,

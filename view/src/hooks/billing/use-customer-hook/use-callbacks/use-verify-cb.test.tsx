@@ -1,7 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { base64UrlEncoder } from "../../../../context/navigation/navigation.provider.test";
 import { useVerifyCB } from "./use-verify-cb";
-import { base64UrlDecoder } from "../../../../context/navigation/navigation.provider";
 
 describe("useVerifyCB", () => {
   it("validates the signature and returns the payload", async () => {

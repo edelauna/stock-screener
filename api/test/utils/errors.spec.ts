@@ -26,7 +26,7 @@ describe('internalServerError', () => {
     // Check the response body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual({
-      message: 'Server Error',
+      message: expect.stringContaining('Server Error'),
       requestId: 'mock-uuid-1234'
     });
 
@@ -53,7 +53,7 @@ describe('internalServerError', () => {
     // Check the response body
     const jsonBody = await response.json();
     expect(jsonBody).toEqual({
-      message: 'Server Error',
+      message: expect.stringContaining('Server Error'),
 
       requestId: 'mock-uuid-1234'
     });
