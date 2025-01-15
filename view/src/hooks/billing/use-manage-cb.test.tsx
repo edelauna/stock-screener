@@ -1,9 +1,8 @@
 import { useContext } from "react";
 import { navigationStore } from "../../context/navigation/navigation.provider";
 import { errorStore } from "../../context/errors/errors.provider";
-import { mswServer } from "../../setupTests";
+import { mockWindowOpen, mswServer } from "../../setupTests";
 import { rest } from "msw";
-import { _ } from "react-router/dist/development/fog-of-war-DU_DzpDb";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useManageCb } from "./use-manage-cb";
 import { Redirect } from "../../context/navigation/navigation.actions";
@@ -50,7 +49,7 @@ describe('useManageCb', () => {
     result.current();
 
     expect(mockNavigationDispatch).toHaveBeenCalledWith(Redirect(true))
-    await waitFor(() => expect(window.location).toBe('https://example.com/session'))
+    await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledWith('https://example.com/session', '_blank'))
     expect(mockNavigationDispatch).toHaveBeenCalledWith(Redirect(false))
   });
 

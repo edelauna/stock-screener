@@ -37,7 +37,7 @@ describe('useTimeSeriesDaily', () => {
 
   it('initializes state and fetches data on symbol change', async () => {
     const mockData = {
-      "Meta Data": createMetaData(),
+      "Meta Data": createMetaData({"5. Time Zone": "UTC"}),
       "Time Series (Daily)": {
         "2023-09-30": createTimeSeriesDayData(),
       },

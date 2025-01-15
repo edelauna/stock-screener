@@ -5,7 +5,6 @@ import { useLogout } from "./hooks/use-logout";
 import { errorStore, initialState } from "../errors/errors.provider";
 import { render, screen, waitFor } from "@testing-library/react";
 import { NavigationProvider, navigationStore, initialState as navigationInitialState } from "./navigation.provider";
-import { useContext } from "react";
 import React from "react";
 import { ActionType } from "./navigation.actions";
 import { createIdentityToken } from "../../test-utils/identity-factory.test";
@@ -50,6 +49,8 @@ describe('NavigationProvider', () => {
     mockUseLogout.mockReturnValue({ loggingOut: false });
     sessionStorage.clear();
   });
+
+  afterEach(() => jest.restoreAllMocks())
 
   const identityToken = createIdentityToken()
 
@@ -252,7 +253,8 @@ describe('NavigationProvider', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it('handles invalid token and navigates to logout', async () => {
+  it('handles invalid token and logs outs', async () => {
+
     const cryptoKeys = await crypto.subtle
       .generateKey(
         {
@@ -270,9 +272,6 @@ describe('NavigationProvider', () => {
     const mockJwt = 'eyJraWQiOiJzb21lLWlkIn0.eyJoZWFkZXIiOnsiYWxnIjoiUlMyNTYiLCJraWQiOiJzb21lLWtleS1pZCIsInR5cCI6IkpXVCJ9LCJwYXlsb2FkIjp7ImV4cCI6MTY3MjUzNDgwMCwibmJmIjoxNjcyNTMxMjAwLCJ2ZXIiOiIxLjAiLCJpc3MiOiJodHRwczovL2V4YW1wbGUuY29tIiwic3ViIjoidXNlcjEyMyIsImF1ZCI6ImNsaWVudC1hcHAiLCJpYXQiOjE2NzI1MzEyMDAsImF1dGhfdGltZSI6MTY3MjUzMTIwMCwib2lkIjoidXNlci1vaWQiLCJuYW1lIjoiSm9obiBEb2UiLCJ0ZnAiOiJCMkNfMV9TaWduVXBPclNpZ25JbiIsImF0X2hhc2giOiJzb21lLWF0LWhhc2gifSwic2lnbmF0dXJlIjoic29tZS1zaWduYXR1cmUifQ.iwW9BZ_wjMJsG1uk02Fpz1yXGE_HPKu6NhAJ4tcjM8dMLGGWWJJe+6Y00tn4RjFqgQr6l9zn7fWC2CAuMcHZCfKpYt53IsuFbzAEP+7tA9kSe54ISZHz+CMil1O11zfJsTjLll5DqoTk1DfMaVj_ourfT3F16xRWUUnMc8FzAsLMhW1dnnWHbIMkPqN2px5bFQF5oDpYXhF1CO3ruS7pY7utkIo34kngp6kBt7zCcgZMlzfi+WrmTuQcpw9F8oKXaM6hIeTaV+ckNvlNVsFYZuecFnExCax6ueyV2qpEs0TyUtny56psDhcvraJ1L+Gg_REjjaLc1VT6vgKuq6Ds+w';
     sessionStorage.setItem('identity_storage', mockJwt);
 
-    const mockNavigate = jest.fn();
-    mockUseNavigate.mockReturnValue(mockNavigate);
-
     render(
       <TestWrapper>
         <NavigationProvider>
@@ -281,8 +280,11 @@ describe('NavigationProvider', () => {
       </TestWrapper>
     );
 
+    const stateElement = screen.getByTestId('state');
+
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/auth/logout');
+      const state = JSON.parse(stateElement.textContent!);
+      expect(state.rawCustomerToken).toBe('')
     });
   });
 
