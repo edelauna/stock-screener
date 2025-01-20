@@ -16,6 +16,6 @@
     "@vitest/coverage-istanbul": "^2.0.5",
     "typescript": "^5.5.2",
     "vitest": "2.0.5",
-    "wrangler": "^3.93.0"
+    "wrangler": "^3.103.2"
   }
 }
