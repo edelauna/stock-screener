@@ -14,7 +14,7 @@ export type Customer = {
       items: {
         data: {
           plan: {
-            id: string
+            product: string
           }
         }[]
       }
@@ -29,8 +29,8 @@ type CustomerSearchResult = {
   data: Customer[]
 }
 
-export const planGuard = (planId: string, ctx: CustomExecutionContext) => {
-  const foundPlanId = ctx.customer?.subscriptions?.data.find(s => s.items.data.find(i => i.plan.id === planId))
+export const planGuard = (productId: string, ctx: CustomExecutionContext) => {
+  const foundPlanId = ctx.customer?.subscriptions?.data.find(s => s.items.data.find(i => i.plan.product === productId))
   return foundPlanId ? true : false
 }
 
@@ -44,7 +44,7 @@ export const pluckCustomerFields = (customer: Customer) => ({
     data: customer.subscriptions?.data.map(d => ({
       items: {
         data: d.items.data.map(di => ({
-          plan: { id: di.plan.id },
+          plan: { product: di.plan.product },
         })),
       },
     })) ?? [],

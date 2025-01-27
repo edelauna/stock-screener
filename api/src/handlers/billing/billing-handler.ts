@@ -71,7 +71,9 @@ export const handleRedirected = async ({ request, ctx, env }: RequestMuxProperti
 
 export const handleUpdate = async ({ request, ctx, env }: RequestMuxProperties) => {
   const { id } = ctx.customer ?? {}
-  if (!id) return internalServerError('no customer_id found.')
+  if (!id) return internalServerError('no customer_id found.', null, {
+    message: "Customer Id not provided"
+  }, 403)
 
   const query = new URLSearchParams({ 'expand[]': 'subscriptions' })
   const customerResponse = await stripeFetchWrapper(`https://api.stripe.com/v1/customers/${id}?${query}`, env)
