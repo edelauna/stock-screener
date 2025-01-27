@@ -1,0 +1,26 @@
+name: Crons
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '* 7 * * 1-5'  # 2 AM (Monday to Friday) EST
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: bot/etf/.node-version
+          cache-dependency-path: bot/etf/package-lock.json
+          cache: "npm"
+
+      - name: Install dependencies
+        run: cd bot/etf && npm install
+
+      - env:
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          WEBSOCKET_URL: ${{ secrets.WEBSOCKET_URL }}
+        run: cd bot/etf && npm start
