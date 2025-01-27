@@ -8,7 +8,9 @@
     "start": "wrangler dev",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "db:schema:local": "npx wrangler d1 execute prod-d1 --local --file=./db/schema.sql",
+    "db:schema:remote": "npx wrangler d1 execute prod-d1 --remote --file=./db/schema.sql --yes"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.2",

@@ -5,15 +5,16 @@ interface Env {
 	API_TOKEN: string;
 	ALLOWED_ORIGIN: string;
 	STOCKS_BASE_URL: string;
-	AZURE_AD_TOKEN_URL: string;
 	AZURE_AD_LOGOUT_URL: string;
-	AZURE_SPA_CLIENT_ID: string;
+	AZURE_AD_TOKEN_URL: string;
 	AZURE_API_CLIENT_ID: string;
+	AZURE_SPA_CLIENT_ID: string;
 	AZURE_SPA_REDIRECT_URI: string;
-	DEV: string;
-	PUBLIC_KEY_TENANT: string;
-	PUBLIC_KEY_POLICY_ID: string;
-	STRIPE_API_KEY: string;
-	RSA_PRIVATE_KEY: string;
 	BASE_PLAN: string;
+	PUBLIC_KEY_POLICY_ID: string;
+	PUBLIC_KEY_TENANT: string;
+	RSA_PRIVATE_KEY: string;
+	STRIPE_API_KEY: string;
+	ETF_API_KEY: string;
+	DB: D1Database;
 }
