@@ -3,7 +3,10 @@ import { env, createExecutionContext } from 'cloudflare:test';
 import { websocketHandler } from '../../../src/handlers/etfs/websocket-handler';
 
 describe('websocketHandler', () => {
-  const mockEnv = env;
+  const mockEnv = {
+    ...env,
+    ETF_API_KEY: 'test123'
+  };
   const mockCtx = createExecutionContext();
 
   beforeEach(() => {
