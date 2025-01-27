@@ -43,7 +43,6 @@ export async function processRow(listing: CsvRow, ttl = 0) {
     try {
       // Step 4: Fetch ETF profile
       etfProfile = await fetchETFProfile(symbol);
-      console.log('etfProfile', etfProfile)
       // seems to be often enough that api returns an empty object
       if(Object.keys(etfProfile).length === 0) return
       // Step 5: Send message to WebSocket
@@ -132,13 +131,13 @@ function main() {
   _ws.onerror = (error) => {
     console.error('WebSocket error:', error);
     // try to reconnect
-    if(!DONE && retries++ < 7) timeoutIds.push(setTimeout(() => main(), 1000 * 5))
+    if(!DONE && retries++ < 7) timeoutIds.push(setTimeout(() => main(), 1000 * 5 * retries))
     else exit(2)
   };
 
   _ws.onclose = () => {
     console.log('WebSocket connection closed');
-    if(!DONE && retries++ < 7) timeoutIds.push(setTimeout(() => main(), 1000 * 5))
+    if(!DONE && retries++ < 7) timeoutIds.push(setTimeout(() => main(), 1000 * 5 * retries))
     else(3)
   };
 //})
