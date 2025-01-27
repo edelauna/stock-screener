@@ -41,8 +41,8 @@ describe('planGuard', () => {
           {
             items: {
               data: [
-                { plan: { id: 'plan_1' } },
-                { plan: { id: 'plan_2' } },
+                { plan: { product: 'plan_1' } },
+                { plan: { product: 'plan_2' } },
               ],
 
             },
@@ -75,8 +75,8 @@ describe('pluckCustomerFields', () => {
           {
             items: {
               data: [
-                { plan: { id: 'plan_1' } },
-                { plan: { id: 'plan_2' } },
+                { plan: { product: 'plan_1' } },
+                { plan: { product: 'plan_2' } },
               ],
             },
           },
@@ -95,8 +95,8 @@ describe('pluckCustomerFields', () => {
           {
             items: {
               data: [
-                { plan: { id: 'plan_1' } },
-                { plan: { id: 'plan_2' } },
+                { plan: { product: 'plan_1' } },
+                { plan: { product: 'plan_2' } },
               ],
             },
           },

@@ -213,7 +213,9 @@ describe('handleUpdate', () => {
     expect(response.status).toBe(500);
     expect(await response.text()).toBe('Internal Server Error');
 
-    expect(internalServerError).toHaveBeenCalledWith('no customer_id found.');
+    expect(internalServerError).toHaveBeenCalledWith('no customer_id found.', null, {
+      message: "Customer Id not provided"
+    }, 403);
   });
 
   it('should handle Stripe API error', async () => {
