@@ -2,7 +2,7 @@ name: Crons
 on:
   workflow_dispatch:
   schedule:
-    - cron: '* 7 * * 1-5'  # 2 AM (Monday to Friday) EST
+    - cron: '0 7 * * 1-5'  # 2 AM (Monday to Friday) EST
 
 jobs:
   scripts:
