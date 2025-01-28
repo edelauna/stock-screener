@@ -1,12 +1,12 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { generateRSIannotations, generateTimeDailySeries, limitXAxis } from '../utils/chart';
 import { format, addMinutes } from 'date-fns';
 import {store as symbolStore} from '../context/symbol-search/symbol-search.provider'
 import { formattedDate } from '../utils/date';
 import { useTimeSeriesDaily } from '../hooks/use-time-series-daily/use-time-series-daily';
-import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import { ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/20/solid';
 
 type AxisRange = {
   min: number;
@@ -27,8 +27,9 @@ export const Chart: React.FC = () => {
 
   const input = symbolState.activeSymbol['2. name']
   const inputSymbol = symbolState.activeSymbol['1. symbol']
-  const {data, metadata, loading} = useTimeSeriesDaily()
+  const {data, metadata, loading, currentFetchRef} = useTimeSeriesDaily()
   const ticker = metadata['2. Symbol']
+  const tickerRef = useRef('')
   const [series, setSeriees] = useState<ApexAxisChartSeries>([{name: input, data:[[]]}])
   const [yAxisRange, setYAxisRange] = useState<AxisRange>({
     min: 200,
@@ -46,6 +47,17 @@ export const Chart: React.FC = () => {
   const [xAnnotation, setXAnnotations] = useState<ApexAnnotations | null>(null)
   const [indicator, setIndicator] = useState({price: 0.00, rsi: 50, date: today})
   const [indicatorLoading, setIndicatorLoading] = useState(true)
+
+  useEffect(() => {
+    // reset brush window
+    if(ticker !== tickerRef.current){
+      setXAxisRange({
+        min: new Date().setDate(today.getDate() - lookBackWindowDays),
+        max: today.getTime(),
+      })
+      tickerRef.current = ticker
+    }
+  }, [today, ticker, lookBackWindowDays])
 
   const updateYAxisRange = useCallback((ctx: ApexContextPartial, {xaxis}: ApexOptions, setter: (value: React.SetStateAction<AxisRange>) => void) => {
     const [minDate, maxDate] = limitXAxis(xaxis?.min!!, xaxis?.max!!)
@@ -317,22 +329,33 @@ export const Chart: React.FC = () => {
       parseInt(month, 10) - 1 === today.getMonth() && // Month in JavaScript is 0-indexed
       parseInt(year, 10) === today.getFullYear());
 
+  const currentFetchRefDate = new Date(currentFetchRef)
+  const currentFetchRefUTC = Date.UTC(currentFetchRefDate.getUTCFullYear(), currentFetchRefDate.getUTCMonth(), currentFetchRefDate.getUTCDate(), currentFetchRefDate.getUTCHours(), currentFetchRefDate.getUTCMinutes(), currentFetchRefDate.getUTCSeconds(), currentFetchRefDate.getUTCMilliseconds())
+
   return (
     <div className="w-full h-100">
       {indicatorLoading ? <div data-testid="loading-indicator" className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>:
-        <div className="flex items-baseline">
-          <Indicator />
-          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Price: {indicator.price} {symbolState.activeSymbol['8. currency']}
-          </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-            as of: {formattedDateString}
-          </span>
-          {isNotToday && <div className="group relative flex">
-            <ExclamationCircleIcon className='block size-5 text-yellow-500 hover:text-yellow-600'/>
-            <span className="absolute bottom-10 scale-0 transition-all rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100">End of Day Quote</span>
+        <div className="flex flex-col items-start">
+          <div className="flex items-baseline">
+            <Indicator />
+            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Price: {indicator.price} {symbolState.activeSymbol['8. currency']}
+            </span>
           </div>
-          }
+          <div className="group relative flex ml-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+              as of: {formattedDateString}
+            </span>
+            <div className="group relative flex">
+              {isNotToday ? <ExclamationCircleIcon className='block size-5 text-yellow-500 hover:text-yellow-600'/>: <InformationCircleIcon className='block size-5 text-blue-500 hover:text-blue-600'/>}
+              <span className="absolute bottom-10 scale-0 transition-all rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 w-32 text-left">
+                {isNotToday ? 
+                  'End of Day Quote' : 
+                  `Last Fetched: 
+                  ${new Date(currentFetchRefUTC)}`}
+              </span>
+            </div>
+          </div>
       </div>
       }
       <div id="wrapper">

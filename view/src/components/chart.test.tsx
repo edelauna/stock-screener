@@ -46,7 +46,7 @@ const TestWrapper = ({ children, activeSymbol = createSymbolSearchResult() }: Te
 describe('Chart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData(), loading: true });
+    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData(), loading: true, currentFetchRef: '' });
     mockGenerateRSIannotations.mockReturnValue([{}, 50]);
     mockGenerateTimeDailySeries.mockReturnValue([[1, 2], [3, 4]]);
     mockLimitXAxis.mockImplementation((min, max) => [min, max]);
@@ -58,7 +58,7 @@ describe('Chart', () => {
       '2. name': 'Apple Inc.',
       '8. currency': 'USD',
     };
-    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData({symbol: 'AAPL'}), loading: false });
+    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData({symbol: 'AAPL'}), loading: false, currentFetchRef: '' });
 
     render(<TestWrapper activeSymbol={createSymbolSearchResult(activeSymbol)}><Chart /></TestWrapper>);
 
@@ -73,7 +73,7 @@ describe('Chart', () => {
       '8. currency': 'USD',
     };
     const mockData = [createTimeSeriesDayData({ '4. close': '100' }), createTimeSeriesDayData({ '4. close': '105' })];
-    mockUseTimeSeriesDaily.mockReturnValue({ data: mockData, metadata: createMetaData(), loading: false });
+    mockUseTimeSeriesDaily.mockReturnValue({ data: mockData, metadata: createMetaData(), loading: false, currentFetchRef: '' });
 
     render(<TestWrapper activeSymbol={createSymbolSearchResult(activeSymbol)}><Chart /></TestWrapper>);
 
@@ -86,7 +86,7 @@ describe('Chart', () => {
       '2. name': 'Apple Inc.',
       '8. currency': 'USD',
     };
-    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData(), loading: true });
+    mockUseTimeSeriesDaily.mockReturnValue({ data: [], metadata: createMetaData(), loading: true, currentFetchRef: '' });
 
     render(<TestWrapper activeSymbol={createSymbolSearchResult(activeSymbol)}><Chart /></TestWrapper>);
 
