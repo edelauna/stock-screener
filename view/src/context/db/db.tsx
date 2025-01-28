@@ -1,7 +1,7 @@
 import { SymbolSearchResult } from "../../hooks/use-symbol-search";
 import { TimeSeriesDayData } from "../../hooks/use-time-series-daily/use-time-series-daily";
 
-export const INDEX_DB_VERSION = 3;
+export const INDEX_DB_VERSION = 4;
 export const INDEX_DB_NAME = 'webDB';
 
 export const TIME_SERIES_DAILY_STORE_NAME = "time-series-daily"
@@ -10,6 +10,8 @@ export const TIME_SERIES_DAILY_METADATA_STORE_NAME = "time-series-daily-metadata
 export const SYMBOL_SEARCH_STORE_NAME = 'symbol-search'
 
 export const BALANCE_SHEET_STORE_NAME = 'balance-sheet'
+
+export const ETF_HOLDINGS_STORE_NAME = 'etf-holdings'
 
 export type TimeSeriesDailyRow = {
   id: string,
@@ -62,6 +64,13 @@ const STORE_CONFIGS: DBConfig[] = [{
     field: 'date', unique: false
   }],
   implementedInVersion: 3
+},{
+  store: ETF_HOLDINGS_STORE_NAME,
+  keyPath: 'id',
+  indexes: [{
+    field: 'symbol', unique: false
+  }],
+  implementedInVersion: 4
 }]
 
 interface OnUpdateNeededCallbackOptions {

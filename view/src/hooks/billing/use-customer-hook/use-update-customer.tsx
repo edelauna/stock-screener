@@ -21,10 +21,10 @@ export const useUpdateCustomer = () => {
       const checkoutId = search.get('checkout_session_id')
       setCheckoutId(checkoutId)
     }
-    else if(location.pathname.startsWith('/managed_redirected')){
+    else if(location.pathname.startsWith('/managed_redirected') && state.rawCustomerToken){
       setStale(true)
     }
-  }, [location])
+  }, [location, state.rawCustomerToken])
 
   const { updating } = useUpdateCustomerData(stale)
 

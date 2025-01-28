@@ -59,6 +59,40 @@ export const useTimeSeriesDaily = () => {
 
   const {db, active} = useDb()
 
+  const FIFTEEN_MINUTES = 15 * 60 * 1000
+
+  useEffect(() => {
+    const poll = () => setFetchRef(formattedDateTime(new Date(), 'UTC'));
+
+    // Function to calculate the delay until the next 15-minute mark
+    const getDelayUntilNextInterval = () => {
+      const now = new Date();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const milliseconds = now.getMilliseconds();
+
+      // Calculate the next 15-minute mark
+      const nextInterval = Math.ceil(minutes / 15) * 15;
+      const delay = (nextInterval - minutes) * 60 * 1000 - seconds * 1000 - milliseconds;
+
+      return (delay < 0) ? FIFTEEN_MINUTES : delay;
+    };
+
+    // Calculate initial delay
+    const initialDelay = getDelayUntilNextInterval();
+    let intervalId: NodeJS.Timer;
+    // Set timeout for initial delay
+    const initialTimeoutId = setTimeout(() => {
+      poll();
+      intervalId = setInterval(poll, FIFTEEN_MINUTES); // 15 minutes
+    }, initialDelay);
+
+    return () => {
+      clearTimeout(initialTimeoutId)
+      if(intervalId) clearInterval(intervalId)
+    };
+  });
+
   useEffect(() => {
     const poll = () => setFetchRef(formattedDateTime(new Date(), 'UTC'))
     const intervalId = setInterval(poll, 15 * 60 * 1000); // 15 minutes
@@ -162,7 +196,7 @@ export const useTimeSeriesDaily = () => {
       }
       objectStores.onerror = (ev) => {
         dispatch(Add({
-          header: "useBalanceSHeet::There was an error loading data from indexDB, event:",
+          header: "useTimeSeriesDaily::There was an error loading data from indexDB, event:",
           body: JSON.stringify(ev)
         }))
         setLoading(false)
@@ -205,7 +239,8 @@ export const useTimeSeriesDaily = () => {
   return {
     data,
     metadata,
-    loading
+    loading,
+    currentFetchRef: currentFetchRef.current
   }
 
 }

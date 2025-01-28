@@ -7,6 +7,7 @@ import { NavBar } from '../components/nav-bar';
 import { navigationStore, SimpleNavigationItem } from '../context/navigation/navigation.provider';
 import { useObserver } from '../hooks/navigation/use-observer';
 import ErrorBanner from '../components/errors/error-banner';
+import { EtfTable } from '../components/etf-table';
 
 export interface User {
   name: string;
@@ -41,6 +42,7 @@ const Main = () => {
           <main>
             <div className={`mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${state.activeSymbol['1. symbol'] !== '' ? '' : 'hidden'}`}>
               <Chart />
+              <EtfTable />
             </div>
             <About ref={aboutRef} />
           </main>
