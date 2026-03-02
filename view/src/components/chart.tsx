@@ -115,6 +115,11 @@ export const Chart: React.FC = () => {
     }
   }, [loading, data, input, ticker, inputSymbol])
 
+  useEffect(() => {
+    setSeriees([{name: input, data:[[]]}])
+    setIndicatorLoading(true)
+  }, [inputSymbol])
+
 
   const [options, setOptions] = useState<ApexOptions>({
     chart: {
@@ -324,8 +329,8 @@ export const Chart: React.FC = () => {
   const [year, month, day] = formattedDateString.split('-');
 
   // Compare with today's date
-  const isNotToday = 
-    !(parseInt(day, 10) === today.getDate() && 
+  const isNotToday =
+    !(parseInt(day, 10) === today.getDate() &&
       parseInt(month, 10) - 1 === today.getMonth() && // Month in JavaScript is 0-indexed
       parseInt(year, 10) === today.getFullYear());
 
@@ -349,9 +354,9 @@ export const Chart: React.FC = () => {
             <div className="group relative flex">
               {isNotToday ? <ExclamationCircleIcon className='block size-5 text-yellow-500 hover:text-yellow-600'/>: <InformationCircleIcon className='block size-5 text-blue-500 hover:text-blue-600'/>}
               <span className="absolute bottom-10 scale-0 transition-all rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 w-32 text-left">
-                {isNotToday ? 
-                  'End of Day Quote' : 
-                  `Last Fetched: 
+                {isNotToday ?
+                  'End of Day Quote' :
+                  `Last Fetched:
                   ${new Date(currentFetchRefUTC)}`}
               </span>
             </div>
@@ -360,10 +365,10 @@ export const Chart: React.FC = () => {
       }
       <div id="wrapper">
         <div id="chart2">
-          <ReactApexChart options={options} series={series} type="line" height={230} />
+          <ReactApexChart key={inputSymbol} options={options} series={series} type="line" height={230} />
         </div>
         <div id="chart1">
-          <ReactApexChart options={optionsLine} series={series} type="area" height={130} />
+          <ReactApexChart key={inputSymbol} options={optionsLine} series={series} type="area" height={130} />
         </div>
       </div>
       <div id="html-dist"></div>
