@@ -51,15 +51,12 @@ const reducer: React.Reducer<State, Actions> = (
 ) => {
   switch(action.type) {
     case ActionType.Navigate:
-      const match = state.navigation.filter(n => n.id === action.payload)
-      if(match.length < 1) return state
       return {
         ...state,
-        navigation: state.navigation.map(n => {
-          n.current = false
-          if(n.id === action.payload) n.current = true
-          return n
-        })
+        navigation: state.navigation.map(n => ({
+          ...n,
+          current: n.id === action.payload
+        }))
       }
     case ActionType.Redirect:
       return {

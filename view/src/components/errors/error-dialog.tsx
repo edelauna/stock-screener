@@ -49,7 +49,7 @@ export default function ErrorDisplay() {
     return (
     <Dialog open={show ?? false} as="div" className="relative z-10 focus:outline-none" onClose={close}>
 
-      <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-white/90">
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-white/90" data-testid="backdrop" onClick={close}>
         <div className="flex min-h-full items-center justify-center p-4">
 
           <DialogPanel

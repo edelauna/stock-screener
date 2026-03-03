@@ -79,7 +79,7 @@ describe('MarketStatusProvider', () => {
     expect(stateElement.textContent).toEqual(JSON.stringify(expectedState));
 
     // Refresh
-    userEvent.click(screen.getByText('Refresh'));
+    await userEvent.click(screen.getByText('Refresh'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...expectedState,
       currentRef: 'newRef',

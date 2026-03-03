@@ -50,36 +50,36 @@ describe('ErrorProvider', () => {
     expect(screen.getByTestId('state').textContent).toEqual(JSON.stringify(initialState));
 
     // Add Error
-    userEvent.click(screen.getByText('Add Error'));
+    await userEvent.click(screen.getByText('Add Error'));
     expect(screen.getByTestId('state').textContent).toEqual(JSON.stringify({
       ...initialState,
       errors: [{ id: '1', header: 'Error 1', body: 'Error 1 description' }],
     }))
 
     // Remove Error
-    userEvent.click(screen.getByText('Remove Error'));
+    await userEvent.click(screen.getByText('Remove Error'));
     expect(stateElement.textContent).toEqual(JSON.stringify(initialState));
 
     // // Add Error again
-    userEvent.click(screen.getByText('Add Error'));
+    await userEvent.click(screen.getByText('Add Error'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...initialState,
       errors: [{ id: '1', header: 'Error 1', body: 'Error 1 description' }],
     }));
 
     // // Remove All Errors
-    userEvent.click(screen.getByText('Remove All Errors'));
+    await userEvent.click(screen.getByText('Remove All Errors'));
     expect(stateElement.textContent).toEqual(JSON.stringify(initialState));
 
     // // Toggle Show
-    userEvent.click(screen.getByText('Toggle Show'));
+    await userEvent.click(screen.getByText('Toggle Show'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...initialState,
       show: true,
     }));
 
     // // Toggle CTA
-    userEvent.click(screen.getByText('Toggle CTA'));
+    await userEvent.click(screen.getByText('Toggle CTA'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...initialState,
       show: true,
