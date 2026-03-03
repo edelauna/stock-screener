@@ -74,14 +74,14 @@ describe('SymbolSearchProvider', () => {
     expect(stateElement.textContent).toEqual(JSON.stringify(symbolInitialState));
 
     // Refresh
-    userEvent.click(screen.getByText('Refresh'));
+    await userEvent.click(screen.getByText('Refresh'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
     }));
 
     // Set Busy
-    userEvent.click(screen.getByText('Set Busy'));
+    await userEvent.click(screen.getByText('Set Busy'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
@@ -90,7 +90,7 @@ describe('SymbolSearchProvider', () => {
 
     // Set Active Symbol
 
-    userEvent.click(screen.getByText('Set Active Symbol'));
+    await userEvent.click(screen.getByText('Set Active Symbol'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
@@ -99,7 +99,7 @@ describe('SymbolSearchProvider', () => {
     }));
 
     // Set Current Data Ref
-    userEvent.click(screen.getByText('Set Current Data Ref'));
+    await userEvent.click(screen.getByText('Set Current Data Ref'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
@@ -109,7 +109,7 @@ describe('SymbolSearchProvider', () => {
     }));
 
     // Set Current Input Ref
-    userEvent.click(screen.getByText('Set Current Input Ref'));
+    await userEvent.click(screen.getByText('Set Current Input Ref'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
@@ -142,7 +142,7 @@ describe('SymbolSearchProvider', () => {
     expect(stateElement.textContent).toEqual(JSON.stringify(symbolInitialState));
 
     // Refresh with bestMatches
-    userEvent.click(screen.getByText('Refresh'));
+    await userEvent.click(screen.getByText('Refresh'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],
@@ -150,7 +150,7 @@ describe('SymbolSearchProvider', () => {
 
     // Set Current Data Ref
 
-    userEvent.click(screen.getByText('Set Current Data Ref'));
+    await userEvent.click(screen.getByText('Set Current Data Ref'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...symbolInitialState,
       bestMatches: [refreshPayload],

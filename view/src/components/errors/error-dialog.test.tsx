@@ -64,10 +64,7 @@ const setup = (initialState: State, identityToken: IdentityToken | null = create
   };
 
   return {
-    ...render(<div data-testid="outside-element">
-      <p>Outside Element</p> {/** needed to test click */}
-      <TestWrapper><ErrorDisplay /></TestWrapper>
-    </div>),
+    ...render(<TestWrapper><ErrorDisplay /></TestWrapper>),
     mockDispatch,
   };
 };
@@ -119,7 +116,7 @@ describe("ErrorDisplay", () => {
     ];
     const { findByTestId, queryByRole, mockDispatch } = setup({ ...initialState, errors, show: true });
 
-    userEvent.click(await findByTestId('outside-element')); // Simulate clicking outside the dialog
+    fireEvent.click(await findByTestId('backdrop')); // Simulate clicking outside the dialog
 
     expect(queryByRole('dialog')).not.toBeInTheDocument()
     expect(mockDispatch).toHaveBeenCalledWith(RemoveAll());

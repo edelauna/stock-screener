@@ -123,7 +123,7 @@ describe('NavigationProvider', () => {
     expect(stateElement.textContent).toEqual(JSON.stringify(navigationInitialState));
 
     // Navigate to About
-    userEvent.click(screen.getByText('Navigate to About'));
+    await userEvent.click(screen.getByText('Navigate to About'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
@@ -133,7 +133,7 @@ describe('NavigationProvider', () => {
     }));
 
     // Set Redirect
-    userEvent.click(screen.getByText('Set Redirect'));
+    await userEvent.click(screen.getByText('Set Redirect'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
@@ -144,7 +144,7 @@ describe('NavigationProvider', () => {
     }));
 
     // Set Identity
-    userEvent.click(screen.getByText('Set Identity'));
+    await userEvent.click(screen.getByText('Set Identity'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
@@ -156,7 +156,7 @@ describe('NavigationProvider', () => {
     }));
 
     // Set Raw Identity
-    userEvent.click(screen.getByText('Set Raw Identity'));
+    await userEvent.click(screen.getByText('Set Raw Identity'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
@@ -169,7 +169,7 @@ describe('NavigationProvider', () => {
     }));
 
     // Set Raw Customer
-    userEvent.click(screen.getByText('Set Raw Customer'));
+    await userEvent.click(screen.getByText('Set Raw Customer'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
@@ -183,7 +183,7 @@ describe('NavigationProvider', () => {
     }));
 
     // Set Auth URL
-    userEvent.click(screen.getByText('Set Auth URL'));
+    await userEvent.click(screen.getByText('Set Auth URL'));
     expect(stateElement.textContent).toEqual(JSON.stringify({
       ...navigationInitialState,
       navigation: [
