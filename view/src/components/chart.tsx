@@ -118,7 +118,7 @@ export const Chart: React.FC = () => {
   useEffect(() => {
     setSeriees([{name: input, data:[[]]}])
     setIndicatorLoading(true)
-  }, [inputSymbol])
+  }, [input])
 
 
   const [options, setOptions] = useState<ApexOptions>({
