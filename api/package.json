@@ -13,7 +13,7 @@
     "db:schema:remote": "npx wrangler d1 execute prod-d1 --remote --file=./db/schema.sql --yes"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.12.18",
+    "@cloudflare/vitest-pool-workers": "^0.12.20",
     "@cloudflare/workers-types": "^4.20260301.1",
     "@vitest/coverage-istanbul": "^2.0.5",
     "typescript": "^5.8.3",
